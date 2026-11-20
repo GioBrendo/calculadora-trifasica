@@ -1,0 +1,2602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Calculadora Trifásica & SEP - Unidade I</title>
+    
+    <!-- KaTeX para renderização tipográfica de equações matemáticas em LaTeX -->
+    <!-- Carregamento não bloqueante: sem internet (APK offline) ou com rede lenta, a calculadora
+         abre e calcula na hora; a memória didática usa texto simples até o KaTeX chegar. -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" media="print" onload="this.media='all'">
+    <script async src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+            onload="if (typeof renderMathKaTeX === 'function') renderMathKaTeX();"></script>
+
+    <style>
+        :root {
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --bg-card-sub: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --primary-light: #e0f2fe;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --accent: #8b5cf6;
+            --grid-line: #e2e8f0;
+            --polar-circle: rgba(148, 163, 184, 0.35);
+            --polar-text: #64748b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+        }
+
+        body.dark-mode {
+            --bg-body: #0b1120;
+            --bg-card: #1e293b;
+            --bg-card-sub: #0f172a;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --primary-light: #082f49;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --accent: #a78bfa;
+            --grid-line: #1e293b;
+            --polar-circle: rgba(71, 85, 105, 0.45);
+            --polar-text: #94a3b8;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 12px;
+            transition: background-color 0.25s, color 0.25s;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Top Header */
+        header {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 1.45rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .header-title p {
+            margin: 2px 0 0 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .header-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn {
+            background: var(--bg-card-sub);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 7px 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .btn:hover {
+            background: var(--border-color);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff !important;
+            border-color: var(--primary);
+        }
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        .btn-success {
+            background: var(--success);
+            color: #ffffff !important;
+            border-color: var(--success);
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.78rem;
+        }
+
+        /* Toggle switches */
+        .toggle-badge {
+            display: inline-flex;
+            align-items: center;
+            background: var(--bg-card-sub);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 2px 4px;
+            gap: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .toggle-btn {
+            padding: 3px 8px;
+            border-radius: 14px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .toggle-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            gap: 6px;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 9px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: var(--radius) var(--radius) 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: none;
+            margin-bottom: -2px;
+        }
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: var(--bg-card-sub);
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            background: var(--bg-card);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards & Grid Layout */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .card-header h2, .card-header h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        /* Form elements */
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+        input[type="number"], select, input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card-sub);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="number"]:focus, select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        /* Campo numérico vazio ou com texto que não é número */
+        input[type="text"].invalid, input[type="text"].invalid:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3);
+        }
+        /* Botão ± para campos que aceitam negativo (só em telas de toque; criado no JS) */
+        .signed-wrap {
+            display: flex;
+            gap: 6px;
+            align-items: stretch;
+        }
+        .signed-wrap input {
+            flex: 1;
+            min-width: 0;
+        }
+        .sign-toggle {
+            flex: 0 0 auto;
+            min-width: 42px;
+            padding: 0 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card-sub);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .input-group {
+            flex: 1;
+        }
+
+        /* Validation Alerts & Banners */
+        .alert-banner {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .alert-banner.show { display: flex; }
+        .alert-banner.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+        body.dark-mode .alert-banner.error {
+            background: #450a0a;
+            color: #fecaca;
+            border-color: #991b1b;
+        }
+        .alert-banner.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+        body.dark-mode .alert-banner.warning {
+            background: #451a03;
+            color: #fde68a;
+            border-color: #78350f;
+        }
+        .alert-banner.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        body.dark-mode .alert-banner.success {
+            background: #052e16;
+            color: #bbf7d0;
+            border-color: #15803d;
+        }
+
+        /* Tables & Results Data */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin: 8px 0;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background: var(--bg-card-sub);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        tr:hover td {
+            background: var(--bg-card-sub);
+        }
+        .num-val {
+            font-family: 'Consolas', 'Fira Code', monospace;
+            font-weight: 600;
+        }
+
+        /* Badges & Chips */
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+        .badge-warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+        .badge-info { background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
+        body.dark-mode .badge-success { background: #052e16; color: #86efac; border-color: #166534; }
+        body.dark-mode .badge-warning { background: #451a03; color: #fcd34d; border-color: #92400e; }
+        body.dark-mode .badge-danger { background: #450a0a; color: #fca5a5; border-color: #991b1b; }
+        body.dark-mode .badge-info { background: #082f49; color: #7dd3fc; border-color: #0369a1; }
+
+        /* SVG Phasor Container */
+        .svg-container {
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            position: relative;
+            background: var(--bg-card-sub);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            overflow: hidden;
+            /* "none" travava a rolagem da página quando o dedo começava sobre o diagrama */
+            touch-action: manipulation;
+        }
+        svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+        }
+
+        /* Tooltip */
+        #phasor-tooltip {
+            /* fixed: posicionado com clientX/clientY (absolute ficava deslocado ao rolar a página) */
+            position: fixed;
+            display: none;
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            box-shadow: var(--shadow-lg);
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+        }
+
+        /* Formulas & KaTeX */
+        .math-box {
+            background: var(--bg-card-sub);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+            padding: 12px 16px;
+            margin: 12px 0;
+            overflow-x: auto;
+            font-size: 0.95rem;
+        }
+
+        /* Preset select */
+        .preset-select {
+            background: var(--bg-card-sub);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        /* Print Media Style */
+        @media print {
+            body { background: #ffffff !important; color: #000000 !important; padding: 0 !important; }
+            header, .tabs-nav, .header-controls, .btn, .no-print { display: none !important; }
+            .tab-content { display: block !important; opacity: 1 !important; }
+            .card { border: 1px solid #ccc !important; box-shadow: none !important; break-inside: avoid; }
+            .svg-container { max-width: 400px; page-break-inside: avoid; }
+            .math-box { background: #f9f9f9 !important; border-left-color: #333 !important; }
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            header { flex-direction: column; align-items: stretch; text-align: center; }
+            .header-controls { justify-content: center; }
+            .grid, .grid-3 { grid-template-columns: 1fr; }
+            .tab-btn { font-size: 0.82rem; padding: 7px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Top Header & Global Actions -->
+    <header>
+        <div class="header-title">
+            <h1>⚡ Calculadora Trifásica & SEP</h1>
+            <p>Sistemas Elétricos de Potência - 6º Semestre (Unidade I: Circuitos Trifásicos, Fortescue, Tellegen & Compensação)</p>
+        </div>
+        <div class="header-controls">
+            <!-- Alternar Grandezas SI / p.u. -->
+            <div class="toggle-badge" title="Alternar entre Grandezas Físicas do SI e Sistema em Por Unidade (p.u.)">
+                <span id="btnSI" class="toggle-btn active" onclick="setBaseMode('SI')">SI (V, A, W)</span>
+                <span id="btnPU" class="toggle-btn" onclick="setBaseMode('PU')">p.u.</span>
+            </div>
+
+            <!-- Seletor de Cenários / Presets de Exercícios -->
+            <select id="presetSelector" class="preset-select" onchange="loadPreset(this.value)" title="Carregar Exercícios Clássicos de SEP">
+                <option value="">📂 Presets da Disciplina...</option>
+                <option value="p1">1. Carga Y Desequilibrada sem Neutro (Flutuante)</option>
+                <option value="p2">2. Carga Y Desequilibrada com Cabo e Impedância de Neutro</option>
+                <option value="p3">3. Carga Triângulo Desequilibrada com Queda de Linha</option>
+                <option value="p4">4. Carga Equilibrada Y com Baixo FP (Compensação)</option>
+                <option value="p5">5. Sistema com Desequilíbrio Severo (Fortescue)</option>
+            </select>
+
+            <button class="btn btn-sm" onclick="exportPDF()" title="Imprimir Relatório Técnico ou Salvar em PDF">🖨️ PDF</button>
+            <button class="btn btn-sm" onclick="exportCSV()" title="Exportar Tabelas de Fasores em CSV">📊 CSV</button>
+            <button class="btn btn-sm" onclick="toggleTheme()" id="btnTheme" title="Alternar Modo Escuro / Claro">🌙</button>
+        </div>
+    </header>
+
+    <!-- Banner de Alertas e Validação (Sem alert() intrusivo) -->
+    <div id="validationBanner" class="alert-banner">
+        <span id="bannerIcon" style="font-size: 1.2rem;">⚠️</span>
+        <div style="flex: 1;">
+            <b id="bannerTitle">Atenção na Validação:</b>
+            <div id="bannerMessage"></div>
+        </div>
+        <button id="bannerActionBtn" class="btn btn-sm" style="display: none;"></button>
+    </div>
+
+    <!-- Navegação em Abas Modernas -->
+    <nav class="tabs-nav no-print">
+        <button class="tab-btn active" onclick="switchTab('tab-params')">⚙️ 1. Parâmetros & Configuração</button>
+        <button class="tab-btn" onclick="switchTab('tab-results')">📊 2. Resultados & Balanço</button>
+        <button class="tab-btn" onclick="switchTab('tab-phasors')">🧭 3. Diagramas Fasoriais SVG</button>
+        <button class="tab-btn" onclick="switchTab('tab-fortescue')">⚖️ 4. Componentes Simétricas</button>
+        <button class="tab-btn" onclick="switchTab('tab-capacitors')">⚡ 5. Correção de FP & Capacitores</button>
+        <button class="tab-btn" onclick="switchTab('tab-math')">📐 6. Memória Didática KaTeX</button>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- ABA 1: PARÂMETROS & CONFIGURAÇÃO           -->
+    <!-- ========================================== -->
+    <div id="tab-params" class="tab-content active">
+        <!-- Card: Configurações da Fonte -->
+        <div class="card">
+            <div class="card-header">
+                <h3>🔌 1. Fonte de Tensão Trifásica</h3>
+                <span class="badge badge-info">Gerador / Barramento</span>
+            </div>
+            <div class="grid-3">
+                <div>
+                    <label>Tipo de Entrada de Tensão:</label>
+                    <select id="voltageInputType" onchange="toggleVoltageInput()">
+                        <option value="phase">Fase-Neutro (Van, Vbn, Vcn)</option>
+                        <option value="line">Linha-Linha (Vab, Vbc, Vca)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Sequência de Fases:</label>
+                    <select id="phaseSequence" onchange="updateSequence()">
+                        <option value="ABC">Sequência Direta (ABC / Positiva)</option>
+                        <option value="BAC">Sequência Inversa (BAC / Negativa)</option>
+                        <option value="custom">Personalizada</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Frequência da Rede (Hz):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="grid_freq" value="60" oninput="recalc()">
+                </div>
+            </div>
+
+            <!-- Fases A, B, C da Fonte -->
+            <div class="grid-3" style="margin-top: 14px;">
+                <!-- Fase A -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px; border-left: 4px solid #ef4444;">
+                    <b style="color: #ef4444;" id="lbl_phase_a">Tensão Fase A:</b>
+                    <label>Módulo (V):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="V_a_m" value="220" oninput="updateSequence()">
+                    <label>Ângulo (°):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="V_a_a" data-signed value="0" oninput="updateSequence()">
+                </div>
+                <!-- Fase B -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px; border-left: 4px solid #0284c7;">
+                    <b style="color: #0284c7;" id="lbl_phase_b">Tensão Fase B:</b>
+                    <label>Módulo (V):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="V_b_m" value="220" oninput="setCustomSequence()">
+                    <label>Ângulo (°):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="V_b_a" data-signed value="-120" oninput="setCustomSequence()">
+                </div>
+                <!-- Fase C -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px; border-left: 4px solid #10b981;">
+                    <b style="color: #10b981;" id="lbl_phase_c">Tensão Fase C:</b>
+                    <label>Módulo (V):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="V_c_m" value="220" oninput="setCustomSequence()">
+                    <label>Ângulo (°):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="V_c_a" data-signed value="120" oninput="setCustomSequence()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Linha de Transmissão / Alimentador (Cabos de Fase e Neutro) -->
+        <div class="card">
+            <div class="card-header">
+                <h3>🛤️ 2. Linha de Transmissão / Alimentador (Cabos)</h3>
+                <span class="badge badge-warning">Impedância Série dos Condutores</span>
+            </div>
+            <div class="grid">
+                <!-- Condutores de Fase -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px;">
+                    <b style="color: var(--primary);">Condutor de Fase (Z_linha):</b>
+                    <div class="input-row" style="margin-top: 8px;">
+                        <div class="input-group">
+                            <label>Formato:</label>
+                            <select id="Z_line_type" onchange="updateLineZLabels()">
+                                <option value="rect">Retangular (R + jX)</option>
+                                <option value="polar">Polar (|Z| ∠ θ°)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label id="lbl_Z_line_1">Resistência R_cabo (Ω):</label>
+                            <input type="text" inputmode="decimal" autocomplete="off" id="Z_line_1" value="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label id="lbl_Z_line_2">Reatância X_cabo (Ω):</label>
+                            <input type="text" inputmode="decimal" autocomplete="off" id="Z_line_2" data-signed value="1.0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4º Condutor de Neutro -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px;" id="box_neutral_cable">
+                    <b style="color: #f59e0b;">Condutor de Neutro Físico (Z_cabo_neutro):</b>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 2px 0 6px 0;">Impedância do cabo do neutro (4º fio entre a fonte e a carga).</p>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label id="lbl_Z_ncable_1">R_neutro (Ω):</label>
+                            <input type="text" inputmode="decimal" autocomplete="off" id="Z_ncable_1" value="0.5">
+                        </div>
+                        <div class="input-group">
+                            <label id="lbl_Z_ncable_2">X_neutro (Ω):</label>
+                            <input type="text" inputmode="decimal" autocomplete="off" id="Z_ncable_2" data-signed value="1.0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Configurações da Carga -->
+        <div class="card">
+            <div class="card-header">
+                <h3>🏭 3. Carga Trifásica (Za, Zb, Zc ou Zab, Zbc, Zca)</h3>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <label style="margin: 0; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: normal;">
+                        <input type="checkbox" id="balancedLoad" checked onchange="updateImpedances()">
+                        <b>Carga Equilibrada (Copiar Za)</b>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid-3">
+                <div>
+                    <label>Tipo de Ligação da Carga:</label>
+                    <select id="connectionType" onchange="toggleConnection()">
+                        <option value="Y">Estrela (Y)</option>
+                        <option value="Delta">Delta / Triângulo (Δ)</option>
+                    </select>
+                </div>
+                <div id="neutralSelectDiv">
+                    <label>Condição do Neutro (Apenas Estrela):</label>
+                    <select id="neutralType" onchange="toggleNeutralInputs()">
+                        <option value="ideal">Com Condutor de Neutro (Aterrado Direto)</option>
+                        <option value="impedance">Neutro com Impedância de Aterramento (Zn)</option>
+                        <option value="none">Sem Neutro (Flutuante / Isolado)</option>
+                    </select>
+                </div>
+                <div id="neutralImpedanceDiv" style="display: none;">
+                    <label>Impedância de Aterramento Zn:</label>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label style="margin-top:0;">Rn (Ω):</label>
+                            <input type="text" inputmode="decimal" autocomplete="off" id="Z_n_1" value="2.0">
+                        </div>
+                        <div class="input-group">
+                            <label style="margin-top:0;">Xn (Ω):</label>
+                            <input type="text" inputmode="decimal" autocomplete="off" id="Z_n_2" data-signed value="0.0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impedâncias da Carga A, B, C -->
+            <div class="grid-3" style="margin-top: 14px;">
+                <!-- Fase A / AB -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px;">
+                    <b id="title_Z_a" style="color: #ef4444;">Impedância Za:</b>
+                    <label>Formato:</label>
+                    <select id="Z_a_type" onchange="updateZLabels('a'); updateImpedances();">
+                        <option value="rect">Retangular (R + jX)</option>
+                        <option value="polar">Polar (|Z| ∠ θ°)</option>
+                    </select>
+                    <label id="lbl_Z_a_1">Resistência R (Ω):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="Z_a_1" value="10" oninput="updateImpedances()">
+                    <label id="lbl_Z_a_2">Reatância X (Ω):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="Z_a_2" data-signed value="5" oninput="updateImpedances()">
+                </div>
+
+                <!-- Fase B / BC -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px;">
+                    <b id="title_Z_b" style="color: #0284c7;">Impedância Zb:</b>
+                    <label>Formato:</label>
+                    <select id="Z_b_type" onchange="updateZLabels('b'); setUnbalancedLoad();">
+                        <option value="rect">Retangular (R + jX)</option>
+                        <option value="polar">Polar (|Z| ∠ θ°)</option>
+                    </select>
+                    <label id="lbl_Z_b_1">Resistência R (Ω):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="Z_b_1" value="10" oninput="setUnbalancedLoad()">
+                    <label id="lbl_Z_b_2">Reatância X (Ω):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="Z_b_2" data-signed value="5" oninput="setUnbalancedLoad()">
+                </div>
+
+                <!-- Fase C / CA -->
+                <div style="background: var(--bg-card-sub); padding: 12px; border-radius: 6px;">
+                    <b id="title_Z_c" style="color: #10b981;">Impedância Zc:</b>
+                    <label>Formato:</label>
+                    <select id="Z_c_type" onchange="updateZLabels('c'); setUnbalancedLoad();">
+                        <option value="rect">Retangular (R + jX)</option>
+                        <option value="polar">Polar (|Z| ∠ θ°)</option>
+                    </select>
+                    <label id="lbl_Z_c_1">Resistência R (Ω):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="Z_c_1" value="10" oninput="setUnbalancedLoad()">
+                    <label id="lbl_Z_c_2">Reatância X (Ω):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="Z_c_2" data-signed value="5" oninput="setUnbalancedLoad()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Card: Parâmetros de Base p.u. -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📐 4. Definição do Sistema de Base (p.u.)</h3>
+                <span class="badge badge-info">Normalização SEP</span>
+            </div>
+            <div class="grid">
+                <div>
+                    <label>Potência Aparente Base (S_base):</label>
+                    <div class="input-row">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="pu_S_val" value="100" oninput="updateBases()">
+                        <select id="pu_S_unit" onchange="updateBases()" style="max-width: 110px;">
+                            <option value="1e3">kVA</option>
+                            <option value="1e6">MVA</option>
+                            <option value="1">VA</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label>Tensão de Linha Base (V_base,L):</label>
+                    <div class="input-row">
+                        <input type="text" inputmode="decimal" autocomplete="off" id="pu_V_val" value="220" oninput="updateBases()">
+                        <select id="pu_V_unit" onchange="updateBases()" style="max-width: 110px;">
+                            <option value="1">V</option>
+                            <option value="1e3">kV</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="background: var(--bg-card-sub); padding: 10px; border-radius: 6px; display: flex; flex-direction: column; justify-content: center;">
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        <b>Grandezas Derivadas de Base:</b><br>
+                        <span>I_base = <b id="lbl_I_base" class="num-val">--</b> A</span> | 
+                        <span>Z_base = <b id="lbl_Z_base" class="num-val">--</b> Ω</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="recalc(true)" style="width: 100%; justify-content: center; padding: 14px; font-size: 1.1rem; box-shadow: var(--shadow-md);">
+            ⚡ Calcular Sistema Completo
+        </button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 2: RESULTADOS & BALANÇO DE ENERGIA     -->
+    <!-- ========================================== -->
+    <div id="tab-results" class="tab-content">
+        <!-- Resumo Rápido em Cards de Indicadores -->
+        <div class="grid-3">
+            <div class="card" style="border-left: 4px solid var(--primary);">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">POTÊNCIA ATIVA TOTAL (CARGA)</span>
+                <h2 id="res_card_P" style="margin: 4px 0; color: var(--primary);">-- W</h2>
+                <span id="res_card_P_pu" style="font-size: 0.85rem; color: var(--text-muted);">-- p.u.</span>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--accent);">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">POTÊNCIA APARENTE & FP</span>
+                <h2 id="res_card_S" style="margin: 4px 0; color: var(--accent);">-- VA</h2>
+                <span id="res_card_FP" style="font-size: 0.85rem; font-weight: 600;">FP: --</span>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--success);">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">RENDIMENTO DA LINHA</span>
+                <h2 id="res_card_eta" style="margin: 4px 0; color: var(--success);">-- %</h2>
+                <span id="res_card_reg" style="font-size: 0.85rem; color: var(--text-muted);">Regulação: -- %</span>
+            </div>
+        </div>
+
+        <!-- Tabela: Tensões e Correntes -->
+        <div class="card">
+            <div class="card-header">
+                <h3>⚡ Tensões e Correntes no Sistema</h3>
+                <span class="badge badge-info" id="badge_mode_ind">Exibindo em SI</span>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Grandeza</th>
+                            <th>Fase A</th>
+                            <th>Fase B</th>
+                            <th>Fase C</th>
+                            <th>Neutro / Deslocamento</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b>Tensão Fase (Carga)</b></td>
+                            <td id="td_V_a" class="num-val">--</td>
+                            <td id="td_V_b" class="num-val">--</td>
+                            <td id="td_V_c" class="num-val">--</td>
+                            <td id="td_V_n" class="num-val">--</td>
+                        </tr>
+                        <tr>
+                            <td><b>Tensão Linha (Carga)</b></td>
+                            <td id="td_V_ab" class="num-val">--</td>
+                            <td id="td_V_bc" class="num-val">--</td>
+                            <td id="td_V_ca" class="num-val">--</td>
+                            <td style="color: var(--text-muted);">--</td>
+                        </tr>
+                        <tr>
+                            <td><b>Corrente de Linha</b></td>
+                            <td id="td_I_a" class="num-val">--</td>
+                            <td id="td_I_b" class="num-val">--</td>
+                            <td id="td_I_c" class="num-val">--</td>
+                            <td id="td_I_n" class="num-val" style="color: #f59e0b;">--</td>
+                        </tr>
+                        <tr id="tr_I_phase_delta" style="display: none;">
+                            <td><b>Corrente Fase (Δ)</b></td>
+                            <td id="td_I_ab" class="num-val">--</td>
+                            <td id="td_I_bc" class="num-val">--</td>
+                            <td id="td_I_ca" class="num-val">--</td>
+                            <td style="color: var(--text-muted);">--</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Balanço de Potências e Fatores de Potência -->
+        <div class="grid">
+            <!-- Potência Consumida na Carga -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>🏭 Potências na Carga</h3>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fase</th>
+                                <th>P (Ativa)</th>
+                                <th>Q (Reativa)</th>
+                                <th>|S| (Aparente)</th>
+                                <th>FP Individual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Fase A</td>
+                                <td id="td_P_ca" class="num-val">--</td>
+                                <td id="td_Q_ca" class="num-val">--</td>
+                                <td id="td_S_ca" class="num-val">--</td>
+                                <td id="td_FP_a" class="num-val">--</td>
+                            </tr>
+                            <tr>
+                                <td>Fase B</td>
+                                <td id="td_P_cb" class="num-val">--</td>
+                                <td id="td_Q_cb" class="num-val">--</td>
+                                <td id="td_S_cb" class="num-val">--</td>
+                                <td id="td_FP_b" class="num-val">--</td>
+                            </tr>
+                            <tr>
+                                <td>Fase C</td>
+                                <td id="td_P_cc" class="num-val">--</td>
+                                <td id="td_Q_cc" class="num-val">--</td>
+                                <td id="td_S_cc" class="num-val">--</td>
+                                <td id="td_FP_c" class="num-val">--</td>
+                            </tr>
+                            <tr style="font-weight: bold; background: var(--bg-card-sub);">
+                                <td>TOTAL</td>
+                                <td id="td_P_c_tot" class="num-val" style="color: var(--primary);">--</td>
+                                <td id="td_Q_c_tot" class="num-val">--</td>
+                                <td id="td_S_c_tot" class="num-val">--</td>
+                                <td id="td_FP_c_tot" class="num-val">--</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+                    <b>FP Vetorial Global:</b> <span id="lbl_FP_vetorial" class="num-val">--</span> | 
+                    <b>FP Aritmético:</b> <span id="lbl_FP_aritmetico" class="num-val">--</span>
+                </div>
+            </div>
+
+            <!-- Balanço de Tellegen e Perdas -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>⚖️ Balanço de Tellegen & Linha</h3>
+                    <span class="badge badge-success">S_fonte = S_carga + S_linha</span>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td><b>Fornecida pela Fonte:</b></td>
+                                <td id="td_S_fonte_tot" class="num-val">--</td>
+                            </tr>
+                            <tr>
+                                <td><b>Consumida na Carga:</b></td>
+                                <td id="td_S_carga_tot" class="num-val">--</td>
+                            </tr>
+                            <tr>
+                                <td><b>Perdas nos Cabos de Fase:</b></td>
+                                <td id="td_S_loss_fases" class="num-val">--</td>
+                            </tr>
+                            <tr>
+                                <td><b>Perdas no Cabo/Neutro:</b></td>
+                                <td id="td_S_loss_neutro" class="num-val">--</td>
+                            </tr>
+                            <tr style="border-top: 2px solid var(--border-color);">
+                                <td><b>Erro Residual de Tellegen:</b></td>
+                                <td id="td_tellegen_err" class="num-val" style="color: var(--success);">0.0000 VA (Conservação Exata)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Método dos Dois Wattímetros (Aron) -->
+                <div style="background: var(--bg-card-sub); padding: 10px; border-radius: 6px; margin-top: 10px;">
+                    <b style="color: var(--accent);">🔬 Método dos Dois Wattímetros (Conexão de Aron):</b>
+                    <div style="font-size: 0.85rem; margin-top: 4px;">
+                        <span>W1 = Re(Vab · Ia*): <b id="lbl_aron_W1" class="num-val">--</b> W</span><br>
+                        <span>W2 = Re(Vcb · Ic*): <b id="lbl_aron_W2" class="num-val">--</b> W</span><br>
+                        <span>P_total (W1 + W2): <b id="lbl_aron_P" class="num-val">--</b> W</span> | 
+                        <span>Q_estimado (√3(W1 - W2)): <b id="lbl_aron_Q" class="num-val">--</b> var</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 3: DIAGRAMAS FASORIAIS SVG             -->
+    <!-- ========================================== -->
+    <div id="tab-phasors" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h3>🧭 Diagramas Fasoriais Interativos em SVG Vetorial</h3>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-sm" onclick="exportSVG('phasorSVG', 'diagrama_fasorial.svg')">⬇ Baixar SVG</button>
+                    <button class="btn btn-sm" onclick="exportPNG('phasorSVG', 'diagrama_fasorial.png')">⬇ Baixar PNG</button>
+                </div>
+            </div>
+
+            <!-- Controles de Camadas (Filtros de Fasores) -->
+            <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; font-size: 0.85rem; background: var(--bg-card-sub); padding: 8px 12px; border-radius: 6px;">
+                <b>Camadas Visíveis:</b>
+                <label style="margin: 0; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <input type="checkbox" id="chk_layer_vfase" checked onchange="drawAllSVGs()">
+                    <span style="color: #ef4444;">■</span> Tensões de Fase (V_an, V_bn, V_cn)
+                </label>
+                <label style="margin: 0; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <input type="checkbox" id="chk_layer_vlinha" checked onchange="drawAllSVGs()">
+                    <span style="color: #8b5cf6;">■</span> Tensões de Linha (V_ab, V_bc, V_ca)
+                </label>
+                <label style="margin: 0; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <input type="checkbox" id="chk_layer_ifase" checked onchange="drawAllSVGs()">
+                    <span style="color: #0284c7;">■</span> Correntes de Linha (I_a, I_b, I_c)
+                </label>
+                <label style="margin: 0; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <input type="checkbox" id="chk_layer_neutro" checked onchange="drawAllSVGs()">
+                    <span style="color: #f59e0b;">■</span> Neutro (In / Vn)
+                </label>
+            </div>
+
+            <div class="grid">
+                <!-- SVG: Diagrama Fasorial Completo -->
+                <div style="text-align: center;">
+                    <h4 style="margin: 0 0 8px 0; color: var(--primary);">Plano Complexo & Fasores de Carga</h4>
+                    <div class="svg-container" id="containerPhasorSVG">
+                        <svg id="phasorSVG" viewBox="-220 -220 440 440"></svg>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                        Toque ou passe o cursor sobre as pontas das flechas para inspecionar magnitude e ângulo.
+                    </p>
+                </div>
+
+                <!-- SVG: Triângulo de Tensões -->
+                <div style="text-align: center;">
+                    <h4 style="margin: 0 0 8px 0; color: var(--accent);">Triângulo de Tensões & Deslocamento de Neutro</h4>
+                    <div class="svg-container" id="containerTriangleSVG">
+                        <svg id="triangleSVG" viewBox="-220 -220 440 440"></svg>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                        Vértices: Fases A, B, C | Ponto Central: Neutro Ideal (N) | <b style="color: #f59e0b;">● N'</b>: Neutro Deslocado de Millman
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 4: COMPONENTES SIMÉTRICAS DE FORTESCUE -->
+    <!-- ========================================== -->
+    <div id="tab-fortescue" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h3>⚖️ Teorema de Fortescue (Componentes de Sequência 0, 1 e 2)</h3>
+                <span class="badge badge-info">Unidade I - SEP</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0;">
+                Decomposição matricial clássica através do operador de rotação complexo <code>a = 1 ∠ 120° = -0.5 + j0.8660</code>.
+            </p>
+
+            <div class="grid">
+                <!-- Tabela de Tensões Simétricas -->
+                <div class="card" style="box-shadow: none; border-color: var(--border-color);">
+                    <h4 style="margin-top: 0; color: var(--primary);">Componentes Simétricas de Tensão (V012)</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Sequência</th>
+                                    <th>Fasor Polar (|V| ∠ θ)</th>
+                                    <th>Forma Retangular (V)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>Zero (V0)</b></td>
+                                    <td id="td_V0_polar" class="num-val">--</td>
+                                    <td id="td_V0_rect" class="num-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Positiva / Direta (V1)</b></td>
+                                    <td id="td_V1_polar" class="num-val" style="color: var(--primary);">--</td>
+                                    <td id="td_V1_rect" class="num-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Negativa / Inversa (V2)</b></td>
+                                    <td id="td_V2_polar" class="num-val" style="color: var(--danger);">--</td>
+                                    <td id="td_V2_rect" class="num-val">--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tabela de Correntes Simétricas -->
+                <div class="card" style="box-shadow: none; border-color: var(--border-color);">
+                    <h4 style="margin-top: 0; color: var(--accent);">Componentes Simétricas de Corrente (I012)</h4>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Sequência</th>
+                                    <th>Fasor Polar (|I| ∠ θ)</th>
+                                    <th>Forma Retangular (A)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>Zero (I0)</b></td>
+                                    <td id="td_I0_polar" class="num-val">--</td>
+                                    <td id="td_I0_rect" class="num-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Positiva / Direta (I1)</b></td>
+                                    <td id="td_I1_polar" class="num-val" style="color: var(--primary);">--</td>
+                                    <td id="td_I1_rect" class="num-val">--</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Negativa / Inversa (I2)</b></td>
+                                    <td id="td_I2_polar" class="num-val" style="color: var(--danger);">--</td>
+                                    <td id="td_I2_rect" class="num-val">--</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicadores de Qualidade de Energia (PRODIST / IEC) -->
+            <div class="card" style="margin-top: 14px; background: var(--bg-card-sub);">
+                <div class="card-header">
+                    <h4>📊 Indicadores de Desequilíbrio & Qualidade de Energia (PRODIST / IEC)</h4>
+                </div>
+                <div class="grid-3">
+                    <div>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">DESEQUILÍBRIO DE TENSÃO (VUF%):</span>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                            <h2 id="lbl_VUF_val" style="margin: 0;">-- %</h2>
+                            <span id="badge_VUF" class="badge">--</span>
+                        </div>
+                        <small style="color: var(--text-muted);">VUF = (|V2| / |V1|) × 100% (Limite PRODIST: 2.0%)</small>
+                    </div>
+
+                    <div>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">DESEQUILÍBRIO DE CORRENTE (CUF%):</span>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                            <h2 id="lbl_CUF_val" style="margin: 0;">-- %</h2>
+                            <span id="badge_CUF" class="badge">--</span>
+                        </div>
+                        <small style="color: var(--text-muted);">CUF = (|I2| / |I1|) × 100%</small>
+                    </div>
+
+                    <div>
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">CONTRIBUIÇÃO DE SEQUÊNCIA ZERO:</span>
+                        <div style="margin-top: 4px;">
+                            <h2 id="lbl_V0_ratio" style="margin: 0;">-- %</h2>
+                        </div>
+                        <small style="color: var(--text-muted);">(|V0| / |V1|) × 100% (Deslocamento de Neutro)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 5: CORREÇÃO DE FP & CAPACITORES        -->
+    <!-- ========================================== -->
+    <div id="tab-capacitors" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h3>⚡ Dimensionamento de Banco de Capacitores Trifásico</h3>
+                <span class="badge badge-success">Eficiência Energética</span>
+            </div>
+
+            <div class="grid">
+                <!-- Configuração de Meta -->
+                <div style="background: var(--bg-card-sub); padding: 14px; border-radius: 6px;">
+                    <b style="color: var(--primary);">Parâmetros de Compensação:</b>
+                    <label>Fator de Potência Desejado (FP_meta):</label>
+                    <input type="text" inputmode="decimal" autocomplete="off" id="target_fp" value="0.95" oninput="calcCapacitors()">
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin: 4px 0 0 0;">
+                        Normativa ANEEL/ONS: FP mínimo de 0.92 indutivo entre 06h e 24h.
+                    </p>
+
+                    <label style="margin-top: 14px;">Potência Reativa Requerida do Banco (Qc):</label>
+                    <h2 id="lbl_Qc_needed" style="margin: 2px 0; color: var(--accent);">-- kvar</h2>
+                </div>
+
+                <!-- Dimensionamento Físico das Células Capacitivas -->
+                <div style="background: var(--bg-card-sub); padding: 14px; border-radius: 6px;">
+                    <b style="color: var(--success);">Dimensionamento por Célula / Fase:</b>
+                    <div style="margin-top: 8px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">LIGAÇÃO EM TRIÂNGULO (Δ - Recomendada):</span>
+                        <div style="font-size: 1.15rem; font-weight: bold; color: var(--primary);" id="lbl_cap_delta">
+                            C_Δ = -- µF <small style="color: var(--text-muted); font-size: 0.8rem;">(Tensão Nominal: V_linha)</small>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px;">
+                        <span style="font-size: 0.85rem; color: var(--text-muted);">LIGAÇÃO EM ESTRELA (Y):</span>
+                        <div style="font-size: 1.15rem; font-weight: bold; color: var(--accent);" id="lbl_cap_star">
+                            C_Y = -- µF <small style="color: var(--text-muted); font-size: 0.8rem;">(Tensão Nominal: V_fase)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ganhos e Impactos no Sistema -->
+            <div class="card" style="margin-top: 14px; box-shadow: none; border-color: var(--border-color);">
+                <h4 style="margin-top: 0; color: var(--primary);">📈 Benefícios e Alívio na Instalação Elétrica</h4>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Parâmetro</th>
+                                <th>Antes da Correção</th>
+                                <th>Após Banco de Capacitores</th>
+                                <th>Alívio / Redução</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>Fator de Potência Global</b></td>
+                                <td id="td_fp_before" class="num-val">--</td>
+                                <td id="td_fp_after" class="num-val" style="color: var(--success); font-weight: bold;">--</td>
+                                <td id="td_fp_gain" class="num-val" style="color: var(--success);">--</td>
+                            </tr>
+                            <tr>
+                                <td><b>Corrente de Linha Média (Alimentador)</b></td>
+                                <td id="td_Iline_before" class="num-val">-- A</td>
+                                <td id="td_Iline_after" class="num-val" style="color: var(--primary);">-- A</td>
+                                <td id="td_Iline_relief" class="num-val" style="color: var(--primary);">-- %</td>
+                            </tr>
+                            <tr>
+                                <td><b>Perdas Térmicas nos Condutores (Efeito Joule)</b></td>
+                                <td id="td_Pjoule_before" class="num-val">-- W</td>
+                                <td id="td_Pjoule_after" class="num-val">-- W</td>
+                                <td id="td_Pjoule_reduction" class="num-val" style="color: var(--success); font-weight: bold;">-- % de redução</td>
+                            </tr>
+                            <tr>
+                                <td><b>Potência Aparente Total (|S|)</b></td>
+                                <td id="td_S_before" class="num-val">-- kVA</td>
+                                <td id="td_S_after" class="num-val">-- kVA</td>
+                                <td id="td_S_freed" class="num-val" style="color: var(--accent);">-- kVA liberados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 6: MEMÓRIA DIDÁTICA DE CÁLCULO (KATEX) -->
+    <!-- ========================================== -->
+    <div id="tab-math" class="tab-content">
+        <div class="card">
+            <div class="card-header">
+                <h3>📐 Memória de Cálculo Passo a Passo (Equações Analíticas)</h3>
+                <span class="badge badge-info">Demonstração Didática</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0;">
+                Abaixo está a resolução formal completa das leis de Kirchhoff, Teorema de Millman, conservação de potências e transformação de Fortescue.
+            </p>
+
+            <div id="mathStepByStep">
+                <!-- Preenchido dinamicamente via KaTeX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tooltip Flutuante dos Fasores -->
+<div id="phasor-tooltip"></div>
+
+<!-- ======================================================== -->
+<!-- SCRIPT: MOTOR DE CÁLCULO, MATEMÁTICA, SVG & CONTROLADORES-->
+<!-- ======================================================== -->
+<script>
+    // --- CONSTANTES E UTILITÁRIOS ---
+    const EPS = 1e-9;
+    const DEG_TO_RAD = Math.PI / 180;
+    const RAD_TO_DEG = 180 / Math.PI;
+
+    // Normaliza ângulo para (-180, 180]
+    function normalizeAngle(ang) {
+        let a = ang % 360;
+        if (a > 180) a -= 360;
+        if (a <= -180) a += 360;
+        return a;
+    }
+
+    // Normaliza números de ponto flutuante evitando -0
+    function cleanZero(val, decimals = 4) {
+        let v = Number(val.toFixed(decimals));
+        return Object.is(v, -0) || Math.abs(v) < 1e-12 ? 0 : v;
+    }
+
+    // Formatação de engenharia com prefixos SI (k, M, m, µ)
+    function formatEng(val, unit = '', decimals = 3) {
+        if (Math.abs(val) < EPS) return `0 ${unit}`.trim();
+        const prefixes = [
+            { factor: 1e6, p: 'M' },
+            { factor: 1e3, p: 'k' },
+            { factor: 1, p: '' },
+            { factor: 1e-3, p: 'm' },
+            { factor: 1e-6, p: 'µ' }
+        ];
+        for (let item of prefixes) {
+            if (Math.abs(val) >= item.factor * 0.999) {
+                return `${(val / item.factor).toFixed(decimals)} ${item.p}${unit}`.trim();
+            }
+        }
+        return `${val.toFixed(decimals)} ${unit}`.trim();
+    }
+
+    // --- CLASSE DE NÚMEROS COMPLEXOS ---
+    class Complex {
+        constructor(r, i) {
+            this.r = Number(r) || 0;
+            this.i = Number(i) || 0;
+        }
+
+        add(c) { return new Complex(this.r + c.r, this.i + c.i); }
+        sub(c) { return new Complex(this.r - c.r, this.i - c.i); }
+        scale(k) { return new Complex(this.r * k, this.i * k); }
+        mul(c) {
+            return new Complex(this.r * c.r - this.i * c.i, this.r * c.i + this.i * c.r);
+        }
+        div(c) {
+            let den = c.r * c.r + c.i * c.i;
+            if (den === 0) return new Complex(NaN, NaN);
+            return new Complex((this.r * c.r + this.i * c.i) / den, (this.i * c.r - this.r * c.i) / den);
+        }
+        inv() { return new Complex(1, 0).div(this); }
+        conj() { return new Complex(this.r, -this.i); }
+        mag() { return Math.hypot(this.r, this.i); }
+        ang() {
+            if (this.isZero()) return 0;
+            return normalizeAngle(Math.atan2(this.i, this.r) * RAD_TO_DEG);
+        }
+        isZero() { return this.mag() < EPS; }
+
+        formatPolar(decimals = 4, unit = '') {
+            if (this.isZero()) return `0.0000 ∠ 0.00° ${unit}`.trim();
+            return `${this.mag().toFixed(decimals)} ∠ ${cleanZero(this.ang(), 2).toFixed(2)}° ${unit}`.trim();
+        }
+
+        formatRect(decimals = 4, unit = '') {
+            let re = cleanZero(this.r, decimals);
+            let im = cleanZero(this.i, decimals);
+            let sign = im < 0 ? '-' : '+';
+            return `${re.toFixed(decimals)} ${sign} j${Math.abs(im).toFixed(decimals)} ${unit}`.trim();
+        }
+
+        static fromPolar(m, a_deg) {
+            let rad = a_deg * DEG_TO_RAD;
+            return new Complex(m * Math.cos(rad), m * Math.sin(rad));
+        }
+
+        static zero() { return new Complex(0, 0); }
+    }
+
+    // Operadores do Teorema de Fortescue
+    const A_OP = Complex.fromPolar(1, 120);
+    const A2_OP = Complex.fromPolar(1, 240);
+
+    // --- ESTADO GLOBAL DA APLICAÇÃO ---
+    const appState = {
+        baseMode: 'SI', // 'SI' ou 'PU'
+        activeTab: 'tab-params',
+        lastResults: null,
+        bases: {
+            S_base: 100e3, // 100 kVA
+            V_base_L: 220,  // 220 V
+            V_base_F: 220 / Math.sqrt(3),
+            I_base: 100e3 / (Math.sqrt(3) * 220),
+            Z_base: (220 * 220) / 100e3
+        }
+    };
+
+    // --- GERENCIAMENTO DE TEMA (DARK/LIGHT) ---
+    // localStorage pode ser null ou lançar exceção (WebView sem DOM storage, modo privado).
+    // Sem esta proteção, um erro aqui abortava toda a inicialização da calculadora.
+    function storageGet(key) {
+        try { return window.localStorage ? localStorage.getItem(key) : null; } catch (e) { return null; }
+    }
+    function storageSet(key, value) {
+        try { if (window.localStorage) localStorage.setItem(key, value); } catch (e) { /* ignora */ }
+    }
+
+    function initTheme() {
+        const saved = storageGet('theme_sep');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.body.classList.add('dark-mode');
+            document.getElementById('btnTheme').innerText = '☀️';
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('btnTheme').innerText = '🌙';
+        }
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        storageSet('theme_sep', isDark ? 'dark' : 'light');
+        document.getElementById('btnTheme').innerText = isDark ? '☀️' : '🌙';
+        drawAllSVGs();
+    }
+
+    // --- GERENCIAMENTO DE ABAS ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        const targetBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+        if (targetBtn) targetBtn.classList.add('active');
+
+        const targetContent = document.getElementById(tabId);
+        if (targetContent) targetContent.classList.add('active');
+
+        appState.activeTab = tabId;
+        if (tabId === 'tab-phasors') {
+            setTimeout(drawAllSVGs, 50);
+        }
+    }
+
+    // --- SISTEMA DE BASES P.U. ---
+    function updateBases() {
+        const sVal = parseDecimal(document.getElementById('pu_S_val').value) || 100;
+        const sUnit = parseFloat(document.getElementById('pu_S_unit').value) || 1e3;
+        const vVal = parseDecimal(document.getElementById('pu_V_val').value) || 220;
+        const vUnit = parseFloat(document.getElementById('pu_V_unit').value) || 1;
+
+        const S_base = sVal * sUnit;
+        const V_base_L = vVal * vUnit;
+        const V_base_F = V_base_L / Math.sqrt(3);
+        const I_base = S_base / (Math.sqrt(3) * V_base_L);
+        const Z_base = (V_base_L * V_base_L) / S_base;
+
+        appState.bases = { S_base, V_base_L, V_base_F, I_base, Z_base };
+
+        document.getElementById('lbl_I_base').innerText = cleanZero(I_base, 2).toFixed(2);
+        document.getElementById('lbl_Z_base').innerText = cleanZero(Z_base, 3).toFixed(3);
+
+        if (appState.lastResults) renderResults(appState.lastResults);
+    }
+
+    function setBaseMode(mode) {
+        appState.baseMode = mode;
+        document.getElementById('btnSI').classList.toggle('active', mode === 'SI');
+        document.getElementById('btnPU').classList.toggle('active', mode === 'PU');
+        document.getElementById('badge_mode_ind').innerText = mode === 'SI' ? 'Exibindo em SI' : 'Exibindo em p.u.';
+        if (appState.lastResults) renderResults(appState.lastResults);
+    }
+
+    // --- VALIDAÇÃO & BANNER INLINE (SEM ALERT) ---
+    function showBanner(type, title, message, actionLabel = null, actionCallback = null) {
+        const b = document.getElementById('validationBanner');
+        b.className = `alert-banner show ${type}`;
+        document.getElementById('bannerTitle').innerText = title;
+        document.getElementById('bannerMessage').innerHTML = message;
+        document.getElementById('bannerIcon').innerText = type === 'error' ? '❌' : (type === 'warning' ? '⚠️' : '✅');
+
+        const btn = document.getElementById('bannerActionBtn');
+        if (actionLabel && actionCallback) {
+            btn.style.display = 'inline-block';
+            btn.innerText = actionLabel;
+            btn.onclick = actionCallback;
+        } else {
+            btn.style.display = 'none';
+        }
+    }
+
+    function hideBanner() {
+        document.getElementById('validationBanner').className = 'alert-banner';
+    }
+
+    // --- LEITURA DE ENTRADAS ---
+    // Os campos numéricos são <input type="text" inputmode="decimal">: <input type="number">
+    // descartava a vírgula ("0,5" virava "05" = 5). Aceita vírgula OU ponto como separador
+    // decimal (só um deles). Separador de milhar não é aceito: "1.234,5" é inválido.
+    // Retorna NaN para campo vazio ou texto inválido.
+    function parseDecimal(text) {
+        const s = String(text)
+            .replace(/[\s ]/g, '')
+            .replace(/[−‒–]/g, '-');   // sinais de menos tipográficos
+        if (!/^[+-]?(\d+([.,]\d*)?|[.,]\d+)([eE][+-]?\d+)?$/.test(s)) return NaN;
+        return Number(s.replace(',', '.'));
+    }
+
+    function getVal(id) {
+        const v = parseDecimal(document.getElementById(id).value);
+        return isNaN(v) ? 0 : v;
+    }
+
+    // Campo numérico válido: não vazio e com um número reconhecível (vírgula ou ponto decimal)
+    function isValidNumberInput(el) {
+        return isFinite(parseDecimal(el.value));
+    }
+
+    // Nome legível do campo para a mensagem: "<título do bloco> - <rótulo>"
+    function describeInput(el) {
+        // Campos com botão ± ficam dentro de um .signed-wrap: o rótulo é irmão do wrapper
+        const ref = el.parentElement.classList.contains('signed-wrap') ? el.parentElement : el;
+        const lbl = ref.previousElementSibling;
+        const label = (lbl && lbl.tagName === 'LABEL') ? lbl.innerText.replace(/:\s*$/, '') : el.id;
+        let node = el.parentElement;
+        while (node && !node.classList.contains('card')) {
+            const title = Array.from(node.children).find(c => c.tagName === 'B');
+            if (title) return `${title.innerText.replace(/:\s*$/, '')} - ${label}`;
+            node = node.parentElement;
+        }
+        return label;
+    }
+
+    // Valida apenas os campos que o solveCircuit() realmente usa na configuração atual
+    function validateNumericInputs() {
+        const ids = ['V_a_m', 'V_a_a', 'V_b_m', 'V_b_a', 'V_c_m', 'V_c_a',
+                     'Z_line_1', 'Z_line_2',
+                     'Z_a_1', 'Z_a_2', 'Z_b_1', 'Z_b_2', 'Z_c_1', 'Z_c_2'];
+        if (document.getElementById('connectionType').value === 'Y') {
+            const neutralType = document.getElementById('neutralType').value;
+            if (neutralType !== 'none') ids.push('Z_ncable_1', 'Z_ncable_2');
+            if (neutralType === 'impedance') ids.push('Z_n_1', 'Z_n_2');
+        }
+
+        document.querySelectorAll('input.invalid').forEach(el => el.classList.remove('invalid'));
+        const bad = ids.map(id => document.getElementById(id)).filter(el => el && !isValidNumberInput(el));
+        if (bad.length === 0) return true;
+
+        bad.forEach(el => el.classList.add('invalid'));
+        showBanner('error', 'Valor inválido ou vazio',
+            `Corrija os campos destacados em vermelho. Use vírgula ou ponto como separador decimal (ex.: 0,5 ou 0.5), sem separador de milhar:` +
+            `<ul style="margin: 6px 0 0 18px; padding: 0;">${bad.map(el => `<li>${describeInput(el)}</li>`).join('')}</ul>`);
+        if (appState.activeTab === 'tab-params') bad[0].focus();
+        return false;
+    }
+
+    // inputmode="decimal" abre o teclado numérico, mas em alguns celulares (ex.: teclado Samsung)
+    // ele não tem a tecla "-". Em telas de toque, os campos que aceitam negativo (data-signed:
+    // ângulos e reatâncias) ganham um botão ± que inverte o sinal do valor.
+    function setupSignToggles() {
+        if (!window.matchMedia || !window.matchMedia('(pointer: coarse)').matches) return;
+        document.querySelectorAll('input[data-signed]').forEach(input => {
+            if (input.parentElement.classList.contains('signed-wrap')) return;
+            const wrap = document.createElement('div');
+            wrap.className = 'signed-wrap';
+            input.parentNode.insertBefore(wrap, input);
+            wrap.appendChild(input);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'sign-toggle';
+            btn.textContent = '±';
+            btn.title = 'Inverter sinal';
+            btn.setAttribute('aria-label', 'Inverter sinal');
+            btn.addEventListener('click', () => {
+                const v = input.value.trim();
+                input.value = v.startsWith('-') ? v.slice(1) : '-' + v;
+                // Dispara os mesmos handlers da digitação (sequência personalizada, cópia de Za...)
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+            wrap.appendChild(btn);
+        });
+    }
+
+    // Remove o destaque vermelho assim que o usuário edita o campo
+    document.addEventListener('input', (e) => {
+        if (e.target.classList && e.target.classList.contains('invalid')) e.target.classList.remove('invalid');
+    });
+
+    function getImpedance(prefix) {
+        const type = document.getElementById(`${prefix}_type`).value;
+        const val1 = getVal(`${prefix}_1`);
+        const val2 = getVal(`${prefix}_2`);
+        if (type === 'rect') {
+            return new Complex(val1, val2);
+        } else {
+            // Módulo sempre não-negativo
+            return Complex.fromPolar(Math.abs(val1), val2);
+        }
+    }
+
+    // --- SINCRONIZAÇÃO DE SELETORES E ROTAÇÃO ---
+    function toggleVoltageInput() {
+        const vType = document.getElementById("voltageInputType").value;
+        if (vType === 'line') {
+            document.getElementById('lbl_phase_a').innerText = 'Tensão Linha Vab:';
+            document.getElementById('lbl_phase_b').innerText = 'Tensão Linha Vbc:';
+            document.getElementById('lbl_phase_c').innerText = 'Tensão Linha Vca:';
+        } else {
+            document.getElementById('lbl_phase_a').innerText = 'Tensão Fase Van:';
+            document.getElementById('lbl_phase_b').innerText = 'Tensão Fase Vbn:';
+            document.getElementById('lbl_phase_c').innerText = 'Tensão Fase Vcn:';
+        }
+        updateSequence();
+    }
+
+    function updateSequence() {
+        const seq = document.getElementById("phaseSequence").value;
+        if (seq === "custom") return;
+
+        let magA = getVal('V_a_m');
+        let angA = getVal('V_a_a');
+
+        document.getElementById("V_b_m").value = magA;
+        document.getElementById("V_c_m").value = magA;
+
+        if (seq === "ABC") {
+            document.getElementById("V_b_a").value = normalizeAngle(angA - 120);
+            document.getElementById("V_c_a").value = normalizeAngle(angA + 120);
+        } else if (seq === "BAC") {
+            document.getElementById("V_b_a").value = normalizeAngle(angA + 120);
+            document.getElementById("V_c_a").value = normalizeAngle(angA - 120);
+        }
+        recalc();
+    }
+
+    function setCustomSequence() {
+        document.getElementById("phaseSequence").value = "custom";
+        recalc();
+    }
+
+    function setUnbalancedLoad() {
+        document.getElementById("balancedLoad").checked = false;
+        recalc();
+    }
+
+    function updateImpedances() {
+        if (!document.getElementById("balancedLoad").checked) return;
+        const type = document.getElementById("Z_a_type").value;
+        const z1 = document.getElementById("Z_a_1").value;
+        const z2 = document.getElementById("Z_a_2").value;
+
+        ['b', 'c'].forEach(p => {
+            document.getElementById(`Z_${p}_type`).value = type;
+            document.getElementById(`Z_${p}_1`).value = z1;
+            document.getElementById(`Z_${p}_2`).value = z2;
+            updateZLabels(p);
+        });
+        recalc();
+    }
+
+    function toggleConnection() {
+        const conn = document.getElementById("connectionType").value;
+        const neutroDiv = document.getElementById("neutralSelectDiv");
+        const neutroImpDiv = document.getElementById("neutralImpedanceDiv");
+        const boxNCable = document.getElementById("box_neutral_cable");
+
+        if (conn === "Delta") {
+            neutroDiv.style.display = "none";
+            neutroImpDiv.style.display = "none";
+            boxNCable.style.display = "none";
+            document.getElementById("title_Z_a").innerText = "Impedância Zab:";
+            document.getElementById("title_Z_b").innerText = "Impedância Zbc:";
+            document.getElementById("title_Z_c").innerText = "Impedância Zca:";
+        } else {
+            neutroDiv.style.display = "block";
+            boxNCable.style.display = "block";
+            toggleNeutralInputs();
+            document.getElementById("title_Z_a").innerText = "Impedância Za:";
+            document.getElementById("title_Z_b").innerText = "Impedância Zb:";
+            document.getElementById("title_Z_c").innerText = "Impedância Zc:";
+        }
+        updateZLabels('a'); updateZLabels('b'); updateZLabels('c');
+        recalc();
+    }
+
+    function toggleNeutralInputs() {
+        if (document.getElementById("connectionType").value === "Delta") return;
+        const type = document.getElementById("neutralType").value;
+        document.getElementById("neutralImpedanceDiv").style.display = (type === "impedance") ? "block" : "none";
+        recalc();
+    }
+
+    function updateZLabels(phase) {
+        const type = document.getElementById(`Z_${phase}_type`).value;
+        const conn = document.getElementById("connectionType").value;
+        let prefix = (conn === "Delta") ? (phase === 'a' ? 'Zab' : (phase === 'b' ? 'Zbc' : 'Zca')) : `Z${phase}`;
+        
+        document.getElementById(`lbl_Z_${phase}_1`).innerText = (type === 'rect') ? `${prefix} - Res R (Ω):` : `${prefix} - Módulo |Z| (Ω):`;
+        document.getElementById(`lbl_Z_${phase}_2`).innerText = (type === 'rect') ? `${prefix} - Reat X (Ω):` : `${prefix} - Ângulo θ (°):`;
+    }
+
+    function updateLineZLabels() {
+        const type = document.getElementById("Z_line_type").value;
+        document.getElementById("lbl_Z_line_1").innerText = (type === 'rect') ? "Resistência R_cabo (Ω):" : "Módulo |Z_cabo| (Ω):";
+        document.getElementById("lbl_Z_line_2").innerText = (type === 'rect') ? "Reatância X_cabo (Ω):" : "Ângulo θ_cabo (°):";
+        recalc();
+    }
+
+    // --- PRESETS DIDÁTICOS DE SEP (UNIDADE I) ---
+    function loadPreset(key) {
+        if (!key) return;
+        document.getElementById("phaseSequence").value = "ABC";
+        document.getElementById("grid_freq").value = 60;
+        document.getElementById("voltageInputType").value = "phase";
+        toggleVoltageInput();
+
+        if (key === 'p1') { // Y Desequilibrada sem Neutro
+            document.getElementById("V_a_m").value = 220; document.getElementById("V_a_a").value = 0;
+            document.getElementById("connectionType").value = "Y";
+            document.getElementById("neutralType").value = "none";
+            document.getElementById("Z_line_1").value = 0.2; document.getElementById("Z_line_2").value = 0.4;
+            document.getElementById("balancedLoad").checked = false;
+            document.getElementById("Z_a_1").value = 10; document.getElementById("Z_a_2").value = 0;
+            document.getElementById("Z_b_1").value = 15; document.getElementById("Z_b_2").value = 10;
+            document.getElementById("Z_c_1").value = 20; document.getElementById("Z_c_2").value = -15;
+        } else if (key === 'p2') { // Y com Cabo e Neutro Real
+            document.getElementById("V_a_m").value = 220; document.getElementById("V_a_a").value = 0;
+            document.getElementById("connectionType").value = "Y";
+            document.getElementById("neutralType").value = "impedance";
+            document.getElementById("Z_n_1").value = 2; document.getElementById("Z_n_2").value = 0.5;
+            document.getElementById("Z_ncable_1").value = 0.5; document.getElementById("Z_ncable_2").value = 0.8;
+            document.getElementById("Z_line_1").value = 0.5; document.getElementById("Z_line_2").value = 1.0;
+            document.getElementById("balancedLoad").checked = false;
+            document.getElementById("Z_a_1").value = 12; document.getElementById("Z_a_2").value = 4;
+            document.getElementById("Z_b_1").value = 18; document.getElementById("Z_b_2").value = 12;
+            document.getElementById("Z_c_1").value = 8; document.getElementById("Z_c_2").value = -6;
+        } else if (key === 'p3') { // Delta Desequilibrada com Linha
+            document.getElementById("V_a_m").value = 220; document.getElementById("V_a_a").value = 0;
+            document.getElementById("connectionType").value = "Delta";
+            document.getElementById("Z_line_1").value = 0.4; document.getElementById("Z_line_2").value = 0.8;
+            document.getElementById("balancedLoad").checked = false;
+            document.getElementById("Z_a_1").value = 30; document.getElementById("Z_a_2").value = 10;
+            document.getElementById("Z_b_1").value = 25; document.getElementById("Z_b_2").value = -15;
+            document.getElementById("Z_c_1").value = 40; document.getElementById("Z_c_2").value = 20;
+        } else if (key === 'p4') { // Equilibrada Y para Compensação
+            document.getElementById("V_a_m").value = 220; document.getElementById("V_a_a").value = 0;
+            document.getElementById("connectionType").value = "Y";
+            document.getElementById("neutralType").value = "ideal";
+            document.getElementById("Z_line_1").value = 0.3; document.getElementById("Z_line_2").value = 0.6;
+            document.getElementById("balancedLoad").checked = true;
+            document.getElementById("Z_a_1").value = 8; document.getElementById("Z_a_2").value = 12;
+            updateImpedances();
+        } else if (key === 'p5') { // Desequilíbrio Severo Fortescue
+            document.getElementById("voltageInputType").value = "phase";
+            document.getElementById("phaseSequence").value = "custom";
+            document.getElementById("V_a_m").value = 240; document.getElementById("V_a_a").value = 5;
+            document.getElementById("V_b_m").value = 210; document.getElementById("V_b_a").value = -115;
+            document.getElementById("V_c_m").value = 195; document.getElementById("V_c_a").value = 130;
+            document.getElementById("connectionType").value = "Y";
+            document.getElementById("neutralType").value = "none";
+            document.getElementById("Z_line_1").value = 0.5; document.getElementById("Z_line_2").value = 1;
+            document.getElementById("balancedLoad").checked = false;
+            document.getElementById("Z_a_1").value = 5; document.getElementById("Z_a_2").value = 20;
+            document.getElementById("Z_b_1").value = 25; document.getElementById("Z_b_2").value = 5;
+            document.getElementById("Z_c_1").value = 10; document.getElementById("Z_c_2").value = -18;
+        }
+
+        toggleConnection();
+        updateSequence();
+        recalc(true);
+    }
+
+    // --- MOTOR DE CÁLCULO ELETRÔNICO & SEP ---
+    function solveCircuit() {
+        hideBanner();
+        if (!validateNumericInputs()) return null;
+
+        const vType = document.getElementById("voltageInputType").value;
+        const connType = document.getElementById("connectionType").value;
+
+        let magA = getVal('V_a_m'); let angA = getVal('V_a_a');
+        let magB = getVal('V_b_m'); let angB = getVal('V_b_a');
+        let magC = getVal('V_c_m'); let angC = getVal('V_c_a');
+
+        let Va_in = Complex.fromPolar(magA, angA);
+        let Vb_in = Complex.fromPolar(magB, angB);
+        let Vc_in = Complex.fromPolar(magC, angC);
+
+        let Van, Vbn, Vcn;
+
+        if (vType === 'line') {
+            // LKT: Vab + Vbc + Vca = 0
+            let Vab_in = Va_in, Vbc_in = Vb_in, Vca_in = Vc_in;
+            let somaLKT = Vab_in.add(Vbc_in).add(Vca_in);
+            let Vref = Math.max(Vab_in.mag(), Vbc_in.mag(), Vca_in.mag());
+
+            if (Vref > 0 && somaLKT.mag() > 0.01 * Vref) {
+                showBanner('error', 'Inconsistência LKT na Fonte', 
+                    `As tensões de linha não fecham o triângulo (LKT): Vab + Vbc + Vca = ${somaLKT.formatPolar(2, 'V')}. Deveria ser 0 V.`,
+                    'Auto-Ajustar Vca', () => {
+                        let Vca_corr = Vab_in.add(Vbc_in).scale(-1);
+                        document.getElementById('V_c_m').value = cleanZero(Vca_corr.mag(), 2);
+                        document.getElementById('V_c_a').value = cleanZero(Vca_corr.ang(), 2);
+                        recalc(true);
+                    }
+                );
+                return null;
+            }
+
+            // Van = (Vab - Vca)/3, etc.
+            Van = Vab_in.sub(Vca_in).scale(1 / 3);
+            Vbn = Vbc_in.sub(Vab_in).scale(1 / 3);
+            Vcn = Vca_in.sub(Vbc_in).scale(1 / 3);
+        } else {
+            Van = Va_in; Vbn = Vb_in; Vcn = Vc_in;
+        }
+
+        // Impedâncias de Carga
+        let Z1 = getImpedance('Z_a');
+        let Z2 = getImpedance('Z_b');
+        let Z3 = getImpedance('Z_c');
+
+        if (Z1.mag() < EPS || Z2.mag() < EPS || Z3.mag() < EPS) {
+            showBanner('error', 'Curto-Circuito na Carga', 'Uma ou mais impedâncias da carga possuem módulo zero (0 Ω). Risco de curto-circuito.');
+            return null;
+        }
+
+        // Impedância da Linha
+        let Z_line = getImpedance('Z_line');
+
+        // Impedâncias de Neutro
+        let Z_ncable = new Complex(getVal('Z_ncable_1'), getVal('Z_ncable_2'));
+        let Z_nground = (document.getElementById("neutralType").value === "impedance") ? 
+            new Complex(getVal('Z_n_1'), getVal('Z_n_2')) : Complex.zero();
+        let Z_ntot = Z_ncable.add(Z_nground);
+
+        let results = {
+            connType,
+            Van_source: Van, Vbn_source: Vbn, Vcn_source: Vcn,
+            Z_line, Z_ntot,
+            Z1, Z2, Z3
+        };
+
+        if (connType === "Y") {
+            let Zta = Z1.add(Z_line);
+            let Ztb = Z2.add(Z_line);
+            let Ztc = Z3.add(Z_line);
+
+            if (Zta.mag() < EPS || Ztb.mag() < EPS || Ztc.mag() < EPS) {
+                showBanner('error', 'Ressonância Série', 'A soma da impedância de linha com a carga gerou admitância infinita (ressonância).');
+                return null;
+            }
+
+            let Ya = Zta.inv(); let Yb = Ztb.inv(); let Yc = Ztc.inv();
+
+            const neutralType = document.getElementById("neutralType").value;
+            let Yn = Complex.zero();
+            if (neutralType !== "none") {
+                if (Z_ntot.mag() > EPS) {
+                    Yn = Z_ntot.inv();
+                } else {
+                    // Neutro perfeitamente ideal de resistência zero
+                    Yn = new Complex(1e12, 0);
+                }
+            }
+
+            let num = Van.mul(Ya).add(Vbn.mul(Yb)).add(Vcn.mul(Yc));
+            let den = Ya.add(Yb).add(Yc).add(Yn);
+
+            if (den.mag() < EPS) {
+                showBanner('error', 'Circuito Singular', 'Denominador de Millman resultou em zero.');
+                return null;
+            }
+
+            let Vnn = num.div(den);
+            if (neutralType === "ideal" && Z_ntot.mag() < EPS) Vnn = Complex.zero();
+
+            let Ia = (Van.sub(Vnn)).mul(Ya);
+            let Ib = (Vbn.sub(Vnn)).mul(Yb);
+            let Ic = (Vcn.sub(Vnn)).mul(Yc);
+            let In = Ia.add(Ib).add(Ic);
+
+            let Vload_an = Ia.mul(Z1);
+            let Vload_bn = Ib.mul(Z2);
+            let Vload_cn = Ic.mul(Z3);
+
+            let Vload_ab = Vload_an.sub(Vload_bn);
+            let Vload_bc = Vload_bn.sub(Vload_cn);
+            let Vload_ca = Vload_cn.sub(Vload_an);
+
+            let Sc_a = Vload_an.mul(Ia.conj());
+            let Sc_b = Vload_bn.mul(Ib.conj());
+            let Sc_c = Vload_cn.mul(Ic.conj());
+            let Sc_tot = Sc_a.add(Sc_b).add(Sc_c);
+
+            let S_loss_fases = Z_line.scale(Ia.mag()**2 + Ib.mag()**2 + Ic.mag()**2);
+            let S_loss_neutro = (neutralType !== "none") ? Z_ntot.scale(In.mag()**2) : Complex.zero();
+
+            Object.assign(results, {
+                Vnn, Ia, Ib, Ic, In,
+                Vload_an, Vload_bn, Vload_cn,
+                Vload_ab, Vload_bc, Vload_ca,
+                Sc_a, Sc_b, Sc_c, Sc_tot,
+                S_loss_fases, S_loss_neutro
+            });
+        } else {
+            // Carga em Triângulo (Delta)
+            let Zab = Z1, Zbc = Z2, Zca = Z3;
+            let Zsum = Zab.add(Zbc).add(Zca);
+
+            if (Zsum.mag() < EPS) {
+                showBanner('error', 'Ressonância Delta', 'Zab + Zbc + Zca = 0. A conversão Delta-Estrela gerou divisão por zero.');
+                return null;
+            }
+
+            let Zya = Zab.mul(Zca).div(Zsum);
+            let Zyb = Zab.mul(Zbc).div(Zsum);
+            let Zyc = Zbc.mul(Zca).div(Zsum);
+
+            let Zta = Zya.add(Z_line);
+            let Ztb = Zyb.add(Z_line);
+            let Ztc = Zyc.add(Z_line);
+
+            let Ya = Zta.inv(); let Yb = Ztb.inv(); let Yc = Ztc.inv();
+            let den = Ya.add(Yb).add(Yc);
+            let num = Van.mul(Ya).add(Vbn.mul(Yb)).add(Vcn.mul(Yc));
+            let Vnn = num.div(den);
+
+            let Ia = (Van.sub(Vnn)).mul(Ya);
+            let Ib = (Vbn.sub(Vnn)).mul(Yb);
+            let Ic = (Vcn.sub(Vnn)).mul(Yc);
+
+            // Tensões nos nós de carga A', B', C'
+            let VA = Van.sub(Ia.mul(Z_line));
+            let VB = Vbn.sub(Ib.mul(Z_line));
+            let VC = Vcn.sub(Ic.mul(Z_line));
+
+            let Vload_ab = VA.sub(VB);
+            let Vload_bc = VB.sub(VC);
+            let Vload_ca = VC.sub(VA);
+
+            let Iab = Vload_ab.div(Zab);
+            let Ibc = Vload_bc.div(Zbc);
+            let Ica = Vload_ca.div(Zca);
+
+            let Sc_ab = Vload_ab.mul(Iab.conj());
+            let Sc_bc = Vload_bc.mul(Ibc.conj());
+            let Sc_ca = Vload_ca.mul(Ica.conj());
+            let Sc_tot = Sc_ab.add(Sc_bc).add(Sc_ca);
+
+            let S_loss_fases = Z_line.scale(Ia.mag()**2 + Ib.mag()**2 + Ic.mag()**2);
+
+            Object.assign(results, {
+                Vnn: Complex.zero(), Ia, Ib, Ic, In: Complex.zero(),
+                Iab, Ibc, Ica,
+                Vload_an: VA.sub(Vnn), Vload_bn: VB.sub(Vnn), Vload_cn: VC.sub(Vnn),
+                Vload_ab, Vload_bc, Vload_ca,
+                Sc_a: Sc_ab, Sc_b: Sc_bc, Sc_c: Sc_ca, Sc_tot,
+                S_loss_fases, S_loss_neutro: Complex.zero()
+            });
+        }
+
+        // Potências da Fonte
+        let Sf_a = Van.mul(results.Ia.conj());
+        let Sf_b = Vbn.mul(results.Ib.conj());
+        let Sf_c = Vcn.mul(results.Ic.conj());
+        let Sf_tot = Sf_a.add(Sf_b).add(Sf_c);
+        results.Sf_a = Sf_a; results.Sf_b = Sf_b; results.Sf_c = Sf_c; results.Sf_tot = Sf_tot;
+
+        // Fatores de Potência
+        results.fp_vetorial = (results.Sc_tot.mag() < EPS) ? 1.0 : 
+            Math.min(1.0, Math.max(0.0, results.Sc_tot.r / results.Sc_tot.mag()));
+
+        let sumP = results.Sc_a.r + results.Sc_b.r + results.Sc_c.r;
+        let sumS = results.Sc_a.mag() + results.Sc_b.mag() + results.Sc_c.mag();
+        results.fp_aritmetico = (sumS < EPS) ? 1.0 : Math.min(1.0, Math.max(0.0, sumP / sumS));
+
+        results.fp_a = results.Sc_a.mag() < EPS ? 1.0 : Math.min(1.0, Math.max(0.0, results.Sc_a.r / results.Sc_a.mag()));
+        results.fp_b = results.Sc_b.mag() < EPS ? 1.0 : Math.min(1.0, Math.max(0.0, results.Sc_b.r / results.Sc_b.mag()));
+        results.fp_c = results.Sc_c.mag() < EPS ? 1.0 : Math.min(1.0, Math.max(0.0, results.Sc_c.r / results.Sc_c.mag()));
+
+        // Rendimento e Regulação
+        results.eta = (Sf_tot.r > EPS) ? (results.Sc_tot.r / Sf_tot.r) * 100 : 100;
+        let V_source_mag = results.Van_source.mag() * Math.sqrt(3);
+        let V_load_mag = results.Vload_ab.mag();
+        results.reg = (V_load_mag > EPS) ? ((V_source_mag - V_load_mag) / V_load_mag) * 100 : 0;
+
+        // Componentes Simétricas de Fortescue (V012 e I012)
+        let V_ref_a = (connType === "Delta") ? results.Vload_ab : results.Vload_an;
+        let V_ref_b = (connType === "Delta") ? results.Vload_bc : results.Vload_bn;
+        let V_ref_c = (connType === "Delta") ? results.Vload_ca : results.Vload_cn;
+
+        let V0 = V_ref_a.add(V_ref_b).add(V_ref_c).scale(1 / 3);
+        let V1 = V_ref_a.add(V_ref_b.mul(A_OP)).add(V_ref_c.mul(A2_OP)).scale(1 / 3);
+        let V2 = V_ref_a.add(V_ref_b.mul(A2_OP)).add(V_ref_c.mul(A_OP)).scale(1 / 3);
+
+        let I0 = results.Ia.add(results.Ib).add(results.Ic).scale(1 / 3);
+        let I1 = results.Ia.add(results.Ib.mul(A_OP)).add(results.Ic.mul(A2_OP)).scale(1 / 3);
+        let I2 = results.Ia.add(results.Ib.mul(A2_OP)).add(results.Ic.mul(A_OP)).scale(1 / 3);
+
+        results.fortescue = {
+            V0, V1, V2,
+            I0, I1, I2,
+            VUF: (V1.mag() > EPS) ? (V2.mag() / V1.mag()) * 100 : 0,
+            CUF: (I1.mag() > EPS) ? (I2.mag() / I1.mag()) * 100 : 0,
+            V0_ratio: (V1.mag() > EPS) ? (V0.mag() / V1.mag()) * 100 : 0
+        };
+
+        // Método de Aron (Dois Wattímetros)
+        let W1 = (results.Vload_ab.mul(results.Ia.conj())).r;
+        let Vcb = results.Vload_bc.scale(-1);
+        let W2 = (Vcb.mul(results.Ic.conj())).r;
+        results.aron = {
+            W1, W2,
+            P_tot: W1 + W2,
+            Q_estim: Math.sqrt(3) * (W1 - W2)
+        };
+
+        return results;
+    }
+
+    // --- RENDERIZADOR DOS RESULTADOS NA TELA ---
+    function renderResults(res) {
+        if (!res) return;
+        const isPU = (appState.baseMode === 'PU');
+        const b = appState.bases;
+
+        function fmtV(cplx, isLine = false) {
+            if (!cplx) return '--';
+            if (isPU) {
+                let base = isLine ? b.V_base_L : b.V_base_F;
+                return `${(cplx.mag() / base).toFixed(4)} ∠ ${cleanZero(cplx.ang(), 2).toFixed(2)}° p.u.`;
+            }
+            return cplx.formatPolar(2, 'V');
+        }
+
+        function fmtI(cplx) {
+            if (!cplx) return '--';
+            if (isPU) {
+                return `${(cplx.mag() / b.I_base).toFixed(4)} ∠ ${cleanZero(cplx.ang(), 2).toFixed(2)}° p.u.`;
+            }
+            return cplx.formatPolar(2, 'A');
+        }
+
+        function fmtP(val) {
+            if (isPU) return `${(val / b.S_base).toFixed(4)} p.u.`;
+            return formatEng(val, 'W', 2);
+        }
+        function fmtQ(val) {
+            if (isPU) return `${(val / b.S_base).toFixed(4)} p.u.`;
+            return formatEng(val, 'var', 2);
+        }
+        function fmtS(val) {
+            if (isPU) return `${(val / b.S_base).toFixed(4)} p.u.`;
+            return formatEng(val, 'VA', 2);
+        }
+
+        // Cards Superiores
+        document.getElementById('res_card_P').innerText = fmtP(res.Sc_tot.r);
+        document.getElementById('res_card_P_pu').innerText = `${(res.Sc_tot.r / b.S_base).toFixed(4)} p.u.`;
+        document.getElementById('res_card_S').innerText = fmtS(res.Sc_tot.mag());
+        document.getElementById('res_card_FP').innerText = `FP: ${res.fp_vetorial.toFixed(4)} (${res.Sc_tot.i > 0.01 ? 'Indutivo' : (res.Sc_tot.i < -0.01 ? 'Capacitivo' : 'Resistivo')})`;
+        document.getElementById('res_card_eta').innerText = `${res.eta.toFixed(2)} %`;
+        document.getElementById('res_card_reg').innerText = `Regulação: ${res.reg.toFixed(2)} %`;
+
+        // Tabela de Tensões e Correntes
+        document.getElementById('td_V_a').innerText = fmtV(res.Vload_an);
+        document.getElementById('td_V_b').innerText = fmtV(res.Vload_bn);
+        document.getElementById('td_V_c').innerText = fmtV(res.Vload_cn);
+        document.getElementById('td_V_n').innerText = (res.connType === 'Delta') ? 'N/A (Δ)' : fmtV(res.Vnn);
+
+        document.getElementById('td_V_ab').innerText = fmtV(res.Vload_ab, true);
+        document.getElementById('td_V_bc').innerText = fmtV(res.Vload_bc, true);
+        document.getElementById('td_V_ca').innerText = fmtV(res.Vload_ca, true);
+
+        document.getElementById('td_I_a').innerText = fmtI(res.Ia);
+        document.getElementById('td_I_b').innerText = fmtI(res.Ib);
+        document.getElementById('td_I_c').innerText = fmtI(res.Ic);
+        document.getElementById('td_I_n').innerText = (res.connType === 'Delta') ? 'N/A (Δ)' : fmtI(res.In);
+
+        const trDelta = document.getElementById('tr_I_phase_delta');
+        if (res.connType === 'Delta') {
+            trDelta.style.display = 'table-row';
+            document.getElementById('td_I_ab').innerText = fmtI(res.Iab);
+            document.getElementById('td_I_bc').innerText = fmtI(res.Ibc);
+            document.getElementById('td_I_ca').innerText = fmtI(res.Ica);
+        } else {
+            trDelta.style.display = 'none';
+        }
+
+        // Potências por Fase
+        document.getElementById('td_P_ca').innerText = fmtP(res.Sc_a.r);
+        document.getElementById('td_Q_ca').innerText = fmtQ(res.Sc_a.i);
+        document.getElementById('td_S_ca').innerText = fmtS(res.Sc_a.mag());
+        document.getElementById('td_FP_a').innerText = res.fp_a.toFixed(4);
+
+        document.getElementById('td_P_cb').innerText = fmtP(res.Sc_b.r);
+        document.getElementById('td_Q_cb').innerText = fmtQ(res.Sc_b.i);
+        document.getElementById('td_S_cb').innerText = fmtS(res.Sc_b.mag());
+        document.getElementById('td_FP_b').innerText = res.fp_b.toFixed(4);
+
+        document.getElementById('td_P_cc').innerText = fmtP(res.Sc_c.r);
+        document.getElementById('td_Q_cc').innerText = fmtQ(res.Sc_c.i);
+        document.getElementById('td_S_cc').innerText = fmtS(res.Sc_c.mag());
+        document.getElementById('td_FP_c').innerText = res.fp_c.toFixed(4);
+
+        document.getElementById('td_P_c_tot').innerText = fmtP(res.Sc_tot.r);
+        document.getElementById('td_Q_c_tot').innerText = fmtQ(res.Sc_tot.i);
+        document.getElementById('td_S_c_tot').innerText = fmtS(res.Sc_tot.mag());
+        document.getElementById('td_FP_c_tot').innerText = res.fp_vetorial.toFixed(4);
+
+        document.getElementById('lbl_FP_vetorial').innerText = res.fp_vetorial.toFixed(4);
+        document.getElementById('lbl_FP_aritmetico').innerText = res.fp_aritmetico.toFixed(4);
+
+        // Balanço de Tellegen
+        document.getElementById('td_S_fonte_tot').innerText = `${fmtP(res.Sf_tot.r)} + j ${fmtQ(res.Sf_tot.i)} (${fmtS(res.Sf_tot.mag())})`;
+        document.getElementById('td_S_carga_tot').innerText = `${fmtP(res.Sc_tot.r)} + j ${fmtQ(res.Sc_tot.i)} (${fmtS(res.Sc_tot.mag())})`;
+        document.getElementById('td_S_loss_fases').innerText = `${fmtP(res.S_loss_fases.r)} + j ${fmtQ(res.S_loss_fases.i)}`;
+        document.getElementById('td_S_loss_neutro').innerText = `${fmtP(res.S_loss_neutro.r)} + j ${fmtQ(res.S_loss_neutro.i)}`;
+
+        // Aron
+        document.getElementById('lbl_aron_W1').innerText = fmtP(res.aron.W1);
+        document.getElementById('lbl_aron_W2').innerText = fmtP(res.aron.W2);
+        document.getElementById('lbl_aron_P').innerText = fmtP(res.aron.P_tot);
+        document.getElementById('lbl_aron_Q').innerText = fmtQ(res.aron.Q_estim);
+
+        // Componentes Simétricas
+        const f = res.fortescue;
+        document.getElementById('td_V0_polar').innerText = fmtV(f.V0);
+        document.getElementById('td_V0_rect').innerText = f.V0.formatRect(2, isPU ? 'p.u.' : 'V');
+        document.getElementById('td_V1_polar').innerText = fmtV(f.V1);
+        document.getElementById('td_V1_rect').innerText = f.V1.formatRect(2, isPU ? 'p.u.' : 'V');
+        document.getElementById('td_V2_polar').innerText = fmtV(f.V2);
+        document.getElementById('td_V2_rect').innerText = f.V2.formatRect(2, isPU ? 'p.u.' : 'V');
+
+        document.getElementById('td_I0_polar').innerText = fmtI(f.I0);
+        document.getElementById('td_I0_rect').innerText = f.I0.formatRect(2, isPU ? 'p.u.' : 'A');
+        document.getElementById('td_I1_polar').innerText = fmtI(f.I1);
+        document.getElementById('td_I1_rect').innerText = f.I1.formatRect(2, isPU ? 'p.u.' : 'A');
+        document.getElementById('td_I2_polar').innerText = fmtI(f.I2);
+        document.getElementById('td_I2_rect').innerText = f.I2.formatRect(2, isPU ? 'p.u.' : 'A');
+
+        document.getElementById('lbl_VUF_val').innerText = `${f.VUF.toFixed(2)} %`;
+        document.getElementById('lbl_CUF_val').innerText = `${f.CUF.toFixed(2)} %`;
+        document.getElementById('lbl_V0_ratio').innerText = `${f.V0_ratio.toFixed(2)} %`;
+
+        const bVUF = document.getElementById('badge_VUF');
+        if (f.VUF <= 2.0) {
+            bVUF.className = 'badge badge-success'; bVUF.innerText = 'Conforme PRODIST (≤ 2%)';
+        } else if (f.VUF <= 3.0) {
+            bVUF.className = 'badge badge-warning'; bVUF.innerText = 'Atenção (2% a 3%)';
+        } else {
+            bVUF.className = 'badge badge-danger'; bVUF.innerText = 'Crítico (> 3%)';
+        }
+
+        const bCUF = document.getElementById('badge_CUF');
+        bCUF.className = f.CUF <= 10.0 ? 'badge badge-success' : 'badge badge-warning';
+        bCUF.innerText = f.CUF <= 10.0 ? 'Adequado' : 'Elevado';
+
+        // Atualizar aba de capacitores e SVGs
+        calcCapacitors();
+        drawAllSVGs();
+        renderMathKaTeX();
+    }
+
+    // --- DIMENSIONAMENTO DE BANCO DE CAPACITORES ---
+    function calcCapacitors() {
+        if (!appState.lastResults) return;
+        const res = appState.lastResults;
+        const targetFP = parseDecimal(document.getElementById('target_fp').value) || 0.95;
+        const freq = parseDecimal(document.getElementById('grid_freq').value) || 60;
+        const omega = 2 * Math.PI * freq;
+
+        const P_tot = res.Sc_tot.r;
+        const Q_tot = res.Sc_tot.i;
+        const fp_atual = res.fp_vetorial;
+
+        if (Q_tot <= 0 || fp_atual >= targetFP) {
+            document.getElementById('lbl_Qc_needed').innerText = '0.00 kvar (FP já otimizado)';
+            document.getElementById('lbl_cap_delta').innerText = '0.00 µF';
+            document.getElementById('lbl_cap_star').innerText = '0.00 µF';
+            return;
+        }
+
+        const theta1 = Math.acos(fp_atual);
+        const theta2 = Math.acos(targetFP);
+        const Qc = P_tot * (Math.tan(theta1) - Math.tan(theta2)); // VAr
+
+        const VL = res.Vload_ab.mag();
+        const VF = VL / Math.sqrt(3);
+
+        const C_delta = (Qc / 3) / (omega * VL * VL); // Farads
+        const C_star = (Qc / 3) / (omega * VF * VF);   // Farads
+
+        document.getElementById('lbl_Qc_needed').innerText = formatEng(Qc, 'var', 2);
+        document.getElementById('lbl_cap_delta').innerHTML = `C_Δ = <b>${(C_delta * 1e6).toFixed(2)} µF</b> <small style="color:var(--text-muted);">(Tensão: ${VL.toFixed(1)} V)</small>`;
+        document.getElementById('lbl_cap_star').innerHTML = `C_Y = <b>${(C_star * 1e6).toFixed(2)} µF</b> <small style="color:var(--text-muted);">(Tensão: ${VF.toFixed(1)} V)</small>`;
+
+        // Ganhos e Alívio
+        const S_antes = res.Sc_tot.mag();
+        const Q_depois = Q_tot - Qc;
+        const S_depois = Math.hypot(P_tot, Q_depois);
+
+        const I_antes = S_antes / (Math.sqrt(3) * VL);
+        const I_depois = S_depois / (Math.sqrt(3) * VL);
+        const alivio_I = ((I_antes - I_depois) / I_antes) * 100;
+        const red_perdas = (1 - (I_depois / I_antes)**2) * 100;
+
+        document.getElementById('td_fp_before').innerText = fp_atual.toFixed(4);
+        document.getElementById('td_fp_after').innerText = targetFP.toFixed(4);
+        document.getElementById('td_fp_gain').innerText = `+${((targetFP - fp_atual)).toFixed(4)}`;
+
+        document.getElementById('td_Iline_before').innerText = `${I_antes.toFixed(2)} A`;
+        document.getElementById('td_Iline_after').innerText = `${I_depois.toFixed(2)} A`;
+        document.getElementById('td_Iline_relief').innerText = `${alivio_I.toFixed(1)} % de alívio`;
+
+        const R_cabo = res.Z_line.r;
+        const Pjoule_antes = 3 * (I_antes**2) * R_cabo;
+        const Pjoule_depois = 3 * (I_depois**2) * R_cabo;
+        document.getElementById('td_Pjoule_before').innerText = formatEng(Pjoule_antes, 'W', 1);
+        document.getElementById('td_Pjoule_after').innerText = formatEng(Pjoule_depois, 'W', 1);
+        document.getElementById('td_Pjoule_reduction').innerText = `${red_perdas.toFixed(1)} % de economia`;
+
+        document.getElementById('td_S_before').innerText = formatEng(S_antes, 'VA', 2);
+        document.getElementById('td_S_after').innerText = formatEng(S_depois, 'VA', 2);
+        document.getElementById('td_S_freed').innerText = formatEng(S_antes - S_depois, 'VA', 2);
+    }
+
+    // --- RENDERIZADOR FASORIAL EM SVG VETORIAL ---
+    const phasorTooltipData = [];
+
+    function hideSVGTooltip() {
+        document.getElementById('phasor-tooltip').style.display = 'none';
+    }
+
+    // Os desenhos chamam esta função a cada redesenho. Os listeners são registrados
+    // só uma vez por SVG (antes se acumulavam a cada recálculo/troca de aba);
+    // os redesenhos seguintes apenas trocam a fonte dos pontos.
+    function setupSVGTooltip(svgId, getPoints) {
+        const svg = document.getElementById(svgId);
+        svg._tooltipPoints = getPoints;
+        if (svg._tooltipReady) return;
+        svg._tooltipReady = true;
+
+        const tooltip = document.getElementById('phasor-tooltip');
+
+        function handlePointer(e) {
+            const rect = svg.getBoundingClientRect();
+            if (rect.width === 0) return;
+            const unitsPerPx = 440 / rect.width;
+            // Coordenadas normalizadas no viewBox de 440x440 (-220 a 220)
+            const x = (e.clientX - rect.left) * unitsPerPx - 220;
+            const y = (e.clientY - rect.top) * (440 / rect.height) - 220;
+
+            // Dedo precisa de área de toque maior (~28 px de tela) que o mouse
+            const isTouch = e.pointerType === 'touch' || e.pointerType === 'pen';
+            const radius = isTouch ? Math.max(18, 28 * unitsPerPx) : 18;
+
+            // Ponto mais próximo dentro do raio (não o primeiro encontrado)
+            let found = null, best = radius;
+            for (let item of svg._tooltipPoints()) {
+                const d = Math.hypot(item.x - x, item.y - y);
+                if (d < best) { best = d; found = item; }
+            }
+
+            if (!found) { tooltip.style.display = 'none'; return; }
+
+            tooltip.innerHTML = `<b>${found.label}</b><br>${found.cplx.formatPolar(2, found.unit)}<br><span style="font-size:0.78rem;color:var(--text-muted);">${found.cplx.formatRect(2, found.unit)}</span>`;
+            tooltip.style.display = 'block';
+
+            // Mantém o tooltip dentro da tela; no toque, acima do dedo para não ficar escondido
+            const w = tooltip.offsetWidth, h = tooltip.offsetHeight, m = 8;
+            const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+            let left = e.clientX + 14;
+            if (left + w > vw - m) left = e.clientX - w - 14;
+            left = Math.max(m, Math.min(left, vw - w - m));
+            let top = isTouch ? e.clientY - h - 24 : e.clientY - 14;
+            if (top < m) top = e.clientY + 24;
+            top = Math.max(m, Math.min(top, vh - h - m));
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+        }
+
+        svg.addEventListener('pointermove', handlePointer);
+        svg.addEventListener('pointerdown', handlePointer);
+        // No toque, pointerleave dispara logo após soltar o dedo: só esconder para mouse
+        svg.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') hideSVGTooltip(); });
+    }
+
+    // Toque fora dos diagramas ou rolagem da página escondem o tooltip
+    document.addEventListener('pointerdown', (e) => {
+        if (!(e.target.closest && e.target.closest('svg[id$="SVG"]'))) hideSVGTooltip();
+    });
+    window.addEventListener('scroll', hideSVGTooltip, { passive: true });
+
+    function drawAllSVGs() {
+        if (!appState.lastResults) return;
+        const res = appState.lastResults;
+        drawMainPhasorSVG(res);
+        drawTriangleSVG(res);
+    }
+
+    function drawMainPhasorSVG(res) {
+        const svg = document.getElementById('phasorSVG');
+        const showVFase = document.getElementById('chk_layer_vfase').checked;
+        const showVLinha = document.getElementById('chk_layer_vlinha').checked;
+        const showIFase = document.getElementById('chk_layer_ifase').checked;
+        const showNeutro = document.getElementById('chk_layer_neutro').checked;
+
+        const isDark = document.body.classList.contains('dark-mode');
+        const polarColor = isDark ? 'rgba(148, 163, 184, 0.25)' : 'rgba(203, 213, 225, 0.6)';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+
+        // Escalas automáticas
+        let maxV = Math.max(res.Vload_an.mag(), res.Vload_bn.mag(), res.Vload_cn.mag(), 
+            showVLinha ? res.Vload_ab.mag() : 0, EPS);
+        let maxI = Math.max(res.Ia.mag(), res.Ib.mag(), res.Ic.mag(), res.In.mag(), EPS);
+
+        const rScaleV = 180 / maxV;
+        const rScaleI = 140 / maxI;
+
+        let items = [];
+        let html = `
+            <defs>
+                <marker id="arrow-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444"/>
+                </marker>
+                <marker id="arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+                </marker>
+                <marker id="arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+                </marker>
+                <marker id="arrow-purple" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#8b5cf6"/>
+                </marker>
+                <marker id="arrow-orange" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b"/>
+                </marker>
+            </defs>
+        `;
+
+        // Grade Polar Graduada (Círculos Concêntricos a 25%, 50%, 75%, 100%)
+        [45, 90, 135, 180].forEach((r, idx) => {
+            html += `<circle cx="0" cy="0" r="${r}" fill="none" stroke="${polarColor}" stroke-dasharray="2,3" stroke-width="1"/>`;
+            let valLabel = cleanZero((maxV * (idx + 1) / 4), 0);
+            html += `<text x="4" y="${-r + 12}" fill="${textColor}" font-size="9" font-family="monospace">${valLabel}V</text>`;
+        });
+
+        // Eixos Radiais a cada 30 graus
+        for (let deg = 0; deg < 360; deg += 30) {
+            let rad = deg * DEG_TO_RAD;
+            let x2 = 185 * Math.cos(rad);
+            let y2 = -185 * Math.sin(rad);
+            html += `<line x1="0" y1="0" x2="${x2}" y2="${y2}" stroke="${polarColor}" stroke-width="0.8"/>`;
+            let tx = 202 * Math.cos(rad);
+            let ty = -202 * Math.sin(rad) + 3;
+            html += `<text x="${tx}" y="${ty}" fill="${textColor}" font-size="8.5" text-anchor="middle" font-family="monospace">${deg}°</text>`;
+        }
+
+        function addVector(cplx, scale, color, marker, label, unit, isDashed = false) {
+            if (!cplx || cplx.isZero()) return;
+            let x = cplx.r * scale;
+            let y = -cplx.i * scale;
+            let dash = isDashed ? 'stroke-dasharray="4,4"' : '';
+            html += `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="${color}" stroke-width="2.5" ${dash} marker-end="url(#${marker})"/>`;
+            html += `<circle cx="${x}" cy="${y}" r="4" fill="${color}" style="cursor:pointer;"/>`;
+            html += `<text x="${x + (x >= 0 ? 8 : -20)}" y="${y + (y >= 0 ? 12 : -8)}" fill="${color}" font-weight="bold" font-size="11">${label}</text>`;
+            items.push({ x, y, label, cplx, unit });
+        }
+
+        // Tensões de Fase
+        if (showVFase) {
+            addVector(res.Vload_an, rScaleV, '#ef4444', 'arrow-red', 'Van', 'V');
+            addVector(res.Vload_bn, rScaleV, '#0284c7', 'arrow-blue', 'Vbn', 'V');
+            addVector(res.Vload_cn, rScaleV, '#10b981', 'arrow-green', 'Vcn', 'V');
+        }
+
+        // Tensões de Linha
+        if (showVLinha) {
+            addVector(res.Vload_ab, rScaleV, '#8b5cf6', 'arrow-purple', 'Vab', 'V');
+            addVector(res.Vload_bc, rScaleV, '#8b5cf6', 'arrow-purple', 'Vbc', 'V');
+            addVector(res.Vload_ca, rScaleV, '#8b5cf6', 'arrow-purple', 'Vca', 'V');
+        }
+
+        // Correntes
+        if (showIFase) {
+            addVector(res.Ia, rScaleI, '#ef4444', 'arrow-red', 'Ia', 'A', true);
+            addVector(res.Ib, rScaleI, '#0284c7', 'arrow-blue', 'Ib', 'A', true);
+            addVector(res.Ic, rScaleI, '#10b981', 'arrow-green', 'Ic', 'A', true);
+        }
+
+        // Neutro
+        if (showNeutro && res.connType !== 'Delta') {
+            if (res.In && !res.In.isZero()) {
+                addVector(res.In, rScaleI, '#f59e0b', 'arrow-orange', 'In', 'A', true);
+            }
+            if (res.Vnn && !res.Vnn.isZero()) {
+                addVector(res.Vnn, rScaleV, '#f59e0b', 'arrow-orange', 'Vn', 'V', false);
+            }
+        }
+
+        svg.innerHTML = html;
+        setupSVGTooltip('phasorSVG', () => items);
+    }
+
+    function drawTriangleSVG(res) {
+        const svg = document.getElementById('triangleSVG');
+        const isDark = document.body.classList.contains('dark-mode');
+        const gridColor = isDark ? 'rgba(148, 163, 184, 0.2)' : 'rgba(203, 213, 225, 0.5)';
+        const textColor = isDark ? '#f1f5f9' : '#0f172a';
+
+        let Van = res.Van_source, Vbn = res.Vbn_source, Vcn = res.Vcn_source;
+        let maxV = Math.max(Van.mag(), Vbn.mag(), Vcn.mag(), EPS);
+        let scale = 170 / maxV;
+
+        let pA = { x: Van.r * scale, y: -Van.i * scale };
+        let pB = { x: Vbn.r * scale, y: -Vbn.i * scale };
+        let pC = { x: Vcn.r * scale, y: -Vcn.i * scale };
+
+        let items = [
+            { x: pA.x, y: pA.y, label: 'Vértice Fase A (Van)', cplx: Van, unit: 'V' },
+            { x: pB.x, y: pB.y, label: 'Vértice Fase B (Vbn)', cplx: Vbn, unit: 'V' },
+            { x: pC.x, y: pC.y, label: 'Vértice Fase C (Vcn)', cplx: Vcn, unit: 'V' }
+        ];
+
+        let html = `
+            <defs>
+                <marker id="tri-ab" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#ef4444"/>
+                </marker>
+                <marker id="tri-bc" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+                </marker>
+                <marker id="tri-ca" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+                </marker>
+            </defs>
+            <circle cx="0" cy="0" r="180" fill="none" stroke="${gridColor}" stroke-dasharray="3,3"/>
+            <line x1="-200" y1="0" x2="200" y2="0" stroke="${gridColor}" stroke-width="0.8"/>
+            <line x1="0" y1="-200" x2="0" y2="200" stroke="${gridColor}" stroke-width="0.8"/>
+        `;
+
+        // Triângulo de Tensões de Linha (B -> A, C -> B, A -> C)
+        html += `<line x1="${pB.x}" y1="${pB.y}" x2="${pA.x}" y2="${pA.y}" stroke="#ef4444" stroke-width="2.5" marker-end="url(#tri-ab)"/>`;
+        html += `<line x1="${pC.x}" y1="${pC.y}" x2="${pB.x}" y2="${pB.y}" stroke="#0284c7" stroke-width="2.5" marker-end="url(#tri-bc)"/>`;
+        html += `<line x1="${pA.x}" y1="${pA.y}" x2="${pC.x}" y2="${pC.y}" stroke="#10b981" stroke-width="2.5" marker-end="url(#tri-ca)"/>`;
+
+        // Vértices A, B, C
+        [ { p: pA, name: 'A', col: '#ef4444' }, { p: pB, name: 'B', col: '#0284c7' }, { p: pC, name: 'C', col: '#10b981' } ].forEach(item => {
+            html += `<circle cx="${item.p.x}" cy="${item.p.y}" r="5" fill="${item.col}"/>`;
+            html += `<text x="${item.p.x + (item.p.x >= 0 ? 10 : -18)}" y="${item.p.y + (item.p.y >= 0 ? 14 : -8)}" fill="${textColor}" font-weight="bold" font-size="13">${item.name}</text>`;
+        });
+
+        // Ponto de Neutro Ideal (Centro 0, 0)
+        html += `<circle cx="0" cy="0" r="4" fill="#94a3b8"/>`;
+        html += `<text x="8" y="14" fill="#94a3b8" font-size="11" font-weight="bold">N (Ideal)</text>`;
+
+        // Deslocamento de Neutro N'
+        if (res.connType !== 'Delta' && res.Vnn && !res.Vnn.isZero()) {
+            let pN = { x: res.Vnn.r * scale, y: -res.Vnn.i * scale };
+            html += `<line x1="0" y1="0" x2="${pN.x}" y2="${pN.y}" stroke="#f59e0b" stroke-width="2"/>`;
+            html += `<circle cx="${pN.x}" cy="${pN.y}" r="6" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/>`;
+            html += `<text x="${pN.x + 10}" y="${pN.y - 6}" fill="#f59e0b" font-weight="bold" font-size="13">N'</text>`;
+
+            // Linhas tracejadas de N' aos vértices
+            html += `<line x1="${pN.x}" y1="${pN.y}" x2="${pA.x}" y2="${pA.y}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+            html += `<line x1="${pN.x}" y1="${pN.y}" x2="${pB.x}" y2="${pB.y}" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+            html += `<line x1="${pN.x}" y1="${pN.y}" x2="${pC.x}" y2="${pC.y}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,4"/>`;
+
+            items.push({ x: pN.x, y: pN.y, label: "Deslocamento de Neutro (Vn'n)", cplx: res.Vnn, unit: 'V' });
+        }
+
+        svg.innerHTML = html;
+        setupSVGTooltip('triangleSVG', () => items);
+    }
+
+    // --- MEMÓRIA DIDÁTICA DE CÁLCULO KATEX ---
+    function renderMathKaTeX() {
+        if (!appState.lastResults) return;
+        const res = appState.lastResults;
+        const container = document.getElementById('mathStepByStep');
+        const hasKatex = (typeof katex !== 'undefined');
+
+        let steps = [];
+
+        // Passo 1: Tensões da Fonte
+        steps.push({
+            title: "1. Tensões da Fonte Trifásica:",
+            latex: `\\mathbf{V}_{an} = ${res.Van_source.formatPolar(2, 'V')}, \\quad \\mathbf{V}_{bn} = ${res.Vbn_source.formatPolar(2, 'V')}, \\quad \\mathbf{V}_{cn} = ${res.Vcn_source.formatPolar(2, 'V')}`,
+            html: `Van = ${res.Van_source.formatPolar(2, 'V')}, Vbn = ${res.Vbn_source.formatPolar(2, 'V')}, Vcn = ${res.Vcn_source.formatPolar(2, 'V')}`
+        });
+
+        // Passo 2: Millman / Queda
+        if (res.connType === 'Y') {
+            steps.push({
+                title: "2. Deslocamento de Neutro de Millman:",
+                latex: `\\mathbf{V}_{n'n} = \\frac{\\mathbf{V}_{an}\\mathbf{Y}_a + \\mathbf{V}_{bn}\\mathbf{Y}_b + \\mathbf{V}_{cn}\\mathbf{Y}_c}{\\mathbf{Y}_a + \\mathbf{Y}_b + \\mathbf{Y}_c + \\mathbf{Y}_n} = ${res.Vnn.formatPolar(3, 'V')}`,
+                html: `Vn'n = (Van·Ya + Vbn·Yb + Vcn·Yc) / (Ya + Yb + Yc + Yn) = ${res.Vnn.formatPolar(3, 'V')}`
+            });
+        } else {
+            steps.push({
+                title: "2. Equivalente Estrela da Carga Triângulo (Δ → Y):",
+                latex: `\\mathbf{Z}_{ya} = \\frac{\\mathbf{Z}_{ab}\\mathbf{Z}_{ca}}{\\sum \\mathbf{Z}} = ${res.Z1.formatPolar(2, '\\Omega')}`,
+                html: `Zya = (Zab·Zca) / (Zab + Zbc + Zca)`
+            });
+        }
+
+        // Passo 3: Correntes de Linha
+        steps.push({
+            title: "3. Correntes de Linha no Alimentador:",
+            latex: `\\mathbf{I}_a = ${res.Ia.formatPolar(2, 'A')}, \\quad \\mathbf{I}_b = ${res.Ib.formatPolar(2, 'A')}, \\quad \\mathbf{I}_c = ${res.Ic.formatPolar(2, 'A')}`,
+            html: `Ia = ${res.Ia.formatPolar(2, 'A')}, Ib = ${res.Ib.formatPolar(2, 'A')}, Ic = ${res.Ic.formatPolar(2, 'A')}`
+        });
+
+        // Passo 4: Potência Complexa Total
+        steps.push({
+            title: "4. Potência Trifásica Complexa (S = P + jQ):",
+            latex: `\\mathbf{S}_{carga} = \\mathbf{S}_a + \\mathbf{S}_b + \\mathbf{S}_c = ${formatEng(res.Sc_tot.r, 'W')} + j\\,${formatEng(res.Sc_tot.i, 'var')} = ${formatEng(res.Sc_tot.mag(), 'VA')} \\angle ${cleanZero(res.Sc_tot.ang(), 2)}^circ`,
+            html: `S_total = ${formatEng(res.Sc_tot.r, 'W')} + j ${formatEng(res.Sc_tot.i, 'var')} = ${formatEng(res.Sc_tot.mag(), 'VA')} ∠ ${cleanZero(res.Sc_tot.ang(), 2)}°`
+        });
+
+        // Passo 5: Matriz de Fortescue
+        steps.push({
+            title: "5. Componentes Simétricas de Fortescue (Tensão de Sequência):",
+            latex: `\\begin{bmatrix} \\mathbf{V}_0 \\\\ \\mathbf{V}_1 \\\\ \\mathbf{V}_2 \\end{bmatrix} = \\frac{1}{3} \\begin{bmatrix} 1 & 1 & 1 \\\\ 1 & a & a^2 \\\\ 1 & a^2 & a \\end{bmatrix} \\begin{bmatrix} \\mathbf{V}_a \\\\ \\mathbf{V}_b \\\\ \\mathbf{V}_c \\end{bmatrix} \\implies \\begin{aligned} \\mathbf{V}_0 &= ${res.fortescue.V0.formatPolar(2, 'V')} \\\\ \\mathbf{V}_1 &= ${res.fortescue.V1.formatPolar(2, 'V')} \\\\ \\mathbf{V}_2 &= ${res.fortescue.V2.formatPolar(2, 'V')} \\end{aligned}`,
+            html: `V0 = ${res.fortescue.V0.formatPolar(2, 'V')}<br>V1 = ${res.fortescue.V1.formatPolar(2, 'V')}<br>V2 = ${res.fortescue.V2.formatPolar(2, 'V')}`
+        });
+
+        let out = '';
+        steps.forEach(st => {
+            out += `<div class="math-box"><b>${st.title}</b><div id="math_${Math.random().toString(36).substring(7)}" style="margin-top:6px;">`;
+            if (hasKatex) {
+                try {
+                    out += katex.renderToString(st.latex, { displayMode: true, throwOnError: false });
+                } catch(e) {
+                    out += `<code>${st.html}</code>`;
+                }
+            } else {
+                out += `<code>${st.html}</code>`;
+            }
+            out += `</div></div>`;
+        });
+
+        container.innerHTML = out;
+    }
+
+    // --- EXPORTAÇÃO CSV & PDF ---
+    function exportCSV() {
+        if (!appState.lastResults) return;
+        const res = appState.lastResults;
+        let csv = 'Grandeza;Módulo;Ângulo (graus);Parte Real;Parte Imaginária;Unidade\n';
+
+        const list = [
+            { name: 'Van_carga', c: res.Vload_an, u: 'V' },
+            { name: 'Vbn_carga', c: res.Vload_bn, u: 'V' },
+            { name: 'Vcn_carga', c: res.Vload_cn, u: 'V' },
+            { name: 'Vab_carga', c: res.Vload_ab, u: 'V' },
+            { name: 'Vbc_carga', c: res.Vload_bc, u: 'V' },
+            { name: 'Vca_carga', c: res.Vload_ca, u: 'V' },
+            { name: 'Ia', c: res.Ia, u: 'A' },
+            { name: 'Ib', c: res.Ib, u: 'A' },
+            { name: 'Ic', c: res.Ic, u: 'A' },
+            { name: 'In', c: res.In, u: 'A' },
+            { name: 'V0_fortescue', c: res.fortescue.V0, u: 'V' },
+            { name: 'V1_fortescue', c: res.fortescue.V1, u: 'V' },
+            { name: 'V2_fortescue', c: res.fortescue.V2, u: 'V' },
+            { name: 'I0_fortescue', c: res.fortescue.I0, u: 'A' },
+            { name: 'I1_fortescue', c: res.fortescue.I1, u: 'A' },
+            { name: 'I2_fortescue', c: res.fortescue.I2, u: 'A' },
+            { name: 'S_carga_total', c: res.Sc_tot, u: 'VA' },
+            { name: 'S_fonte_total', c: res.Sf_tot, u: 'VA' }
+        ];
+
+        list.forEach(item => {
+            csv += `${item.name};${item.c.mag().toFixed(4)};${cleanZero(item.c.ang(), 2).toFixed(2)};${item.c.r.toFixed(4)};${item.c.i.toFixed(4)};${item.u}\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "relatorio_trifasico_sep.csv";
+        link.click();
+    }
+
+    function exportPDF() {
+        window.print();
+    }
+
+    function exportSVG(svgId, filename) {
+        const svg = document.getElementById(svgId);
+        const serializer = new XMLSerializer();
+        let source = serializer.serializeToString(svg);
+        if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+            source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+        const blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    function exportPNG(svgId, filename) {
+        const svg = document.getElementById(svgId);
+        const serializer = new XMLSerializer();
+        let source = serializer.serializeToString(svg);
+        const img = new Image();
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(source);
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 880;
+            canvas.height = 880;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = document.body.classList.contains('dark-mode') ? '#1e293b' : '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const a = document.createElement('a');
+            a.download = filename;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        };
+    }
+
+    // --- RECALCULAR SISTEMA ---
+    function recalc(autoSwitchTab = false) {
+        const results = solveCircuit();
+        if (results) {
+            appState.lastResults = results;
+            renderResults(results);
+            if (autoSwitchTab && appState.activeTab === 'tab-params') {
+                switchTab('tab-results');
+            }
+        }
+    }
+
+    // --- INICIALIZAÇÃO ---
+    window.addEventListener('DOMContentLoaded', () => {
+        setupSignToggles();
+        initTheme();
+        updateBases();
+        updateSequence();
+        recalc(false);
+    });
+</script>
+
+</body>
+</html>
